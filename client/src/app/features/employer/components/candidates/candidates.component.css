@@ -1,0 +1,383 @@
+.candidates-management {
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Page Header */
+.page-toolbar {
+  background: transparent !important;
+  padding: 0 0 1rem 0;
+  box-shadow: none;
+}
+
+.toolbar-left .title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.25rem;
+}
+
+.toolbar-left .subtitle {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+/* Search and Actions Card */
+.search-actions-card {
+  margin-bottom: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.search-actions-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.search-section {
+  flex: 1;
+  max-width: 400px;
+}
+
+.search-field {
+  width: 100%;
+}
+
+.actions-section {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.add-btn {
+  min-width: 160px;
+  height: 48px;
+  font-weight: 500;
+  border-radius: 0.5rem;
+}
+
+/* Results Header */
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0 0.25rem;
+}
+
+.results-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.results-count {
+  font-weight: 600;
+  color: #333;
+}
+
+.results-total {
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.results-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.results-actions button {
+  width: 40px;
+  height: 40px;
+  border-radius: 0.5rem;
+}
+
+/* Candidates Table Card */
+.candidates-table-card {
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.candidates-table {
+  width: 100%;
+  background: white;
+}
+
+.candidates-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #333;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  padding: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.candidates-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: top;
+}
+
+.candidate-row {
+  transition: background-color 0.2s ease;
+}
+
+.candidate-row:hover {
+  background-color: #f8f9fa;
+}
+
+/* Candidate Info */
+.candidate-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.candidate-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #1976d2;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.candidate-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.candidate-name {
+  font-weight: 500;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.candidate-skills {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.skills-more {
+  color: #1976d2;
+  font-weight: 500;
+}
+
+/* Contact Info */
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.contact-icon {
+  font-size: 1rem;
+  width: 1rem;
+  height: 1rem;
+  color: #666;
+}
+
+.contact-link {
+  text-decoration: none;
+  color: #1976d2;
+  font-size: 0.875rem;
+  transition: color 0.2s ease;
+}
+
+.contact-link:hover {
+  color: #1565c0;
+  text-decoration: underline;
+}
+
+/* Chips */
+.client-chip {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 1rem;
+}
+
+.status-chip {
+  font-size: 0.75rem;
+  font-weight: 500;
+  min-height: 24px;
+}
+
+/* Only two status colors: active and ended */
+.status-chip.status-active {
+  background-color: #bcf3b4;
+  color: #388e3c;
+}
+.status-chip.status-ended {
+  background-color: #e67f7f !important;
+}
+
+/* Actions */
+.actions-cell {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.actions-cell button {
+  width: 36px;
+  height: 36px;
+  border-radius: 0.5rem;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #666;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 1rem;
+  color: #bbb;
+}
+
+.empty-state h3 {
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.empty-state p {
+  color: #666;
+  margin-bottom: 1.5rem;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.empty-state button {
+  min-width: 180px;
+}
+
+/* Pagination */
+mat-paginator {
+  background: transparent;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .candidates-management {
+    padding: 0.5rem;
+  }
+
+  .search-actions-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .search-section {
+    max-width: none;
+  }
+
+  .actions-section {
+    justify-content: center;
+  }
+
+  .add-btn {
+    width: 100%;
+  }
+
+  .results-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .results-actions {
+    align-self: flex-end;
+  }
+
+  .candidate-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .contact-info {
+    gap: 0.25rem;
+  }
+
+  .contact-item {
+    font-size: 0.8rem;
+  }
+
+  .actions-cell {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .toolbar-left .title {
+    font-size: 1.25rem;
+  }
+
+  .candidates-table th,
+  .candidates-table td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .candidate-name {
+    font-size: 0.85rem;
+  }
+
+  .candidate-skills {
+    font-size: 0.7rem;
+  }
+}
+
+/* Loading and Hover Effects */
+.add-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(25, 118, 210, 0.3);
+}
+
+.results-actions button:hover {
+  background-color: #f5f5f5;
+}
+
+.candidate-row:hover .actions-cell button {
+  opacity: 1;
+}
+
+.actions-cell button {
+  opacity: 0.7;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.actions-cell button:hover {
+  opacity: 1;
+}

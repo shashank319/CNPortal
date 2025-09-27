@@ -1,0 +1,130 @@
+<div class="container-fluid py-3">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Timesheets Management</h1>
+      <div class="page-subtitle">Overview of submissions and hours</div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="metric">
+      <div class="icon-bubble icon-success"><i class="fas fa-check"></i></div>
+      <div>
+        <div class="label">Submitted</div>
+        <div class="value">{{ timesheetSummary.approvedTimesheets }}</div>
+      </div>
+    </div>
+
+    <div class="metric">
+      <div class="icon-bubble icon-warning"><i class="fas fa-clock"></i></div>
+      <div>
+        <div class="label">Pending</div>
+        <div class="value">{{ timesheetSummary.pendingApprovals }}</div>
+      </div>
+    </div>
+
+    <div class="metric">
+      <div class="icon-bubble icon-info"><i class="fas fa-calendar-week"></i></div>
+      <div>
+        <div class="label">Total Hours</div>
+        <div class="value">{{ timesheetSummary.totalHoursThisMonth | number }}</div>
+      </div>
+    </div>
+
+    <div class="metric">
+      <div class="icon-bubble icon-purple"><i class="fas fa-users"></i></div>
+      <div>
+        <div class="label">Active Candidates</div>
+        <div class="value">15</div> <!-- bind as needed -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="filters">
+      <select class="form-select">
+        <option>December 2024</option>
+        <option>November 2024</option>
+      </select>
+      <select class="form-select">
+        <option>All Status</option>
+        <option>Submitted</option>
+        <option>Pending</option>
+      </select>
+    </div>
+    <div class="actions">
+      <button class="btn-solid"><i class="fas fa-download me-2"></i>Export</button>
+      <button class="btn-ghost"><i class="fas fa-rotate-right me-2"></i>Refresh</button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">Timesheet Overview</div>
+    </div>
+
+    <div class="panel-body">
+      <table class="table-modern">
+        <thead>
+          <tr>
+            <th scope="col">Candidate Name</th>
+            <th scope="col">Month</th>
+            <th scope="col">Hours Logged</th>
+            <th scope="col">Status</th>
+            <th scope="col">Submitted Date</th>
+            <th scope="col" style="width:120px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let t of recentTimesheets; trackBy: trackById">
+            <td>
+              <div class="user-cell">
+                <img class="avatar" src="https://i.pravatar.cc/80?img=5" alt="" />
+                <div>
+                  <div class="name">CN</div>
+                  <div class="email">sarah.johnsonemail.com</div>
+                </div>
+              </div>
+            </td>
+            <td>December 2024</td>
+            <td>{{ t.totalHours || '-' }} <span *ngIf="t.totalHours">hrs</span></td>
+            <td>
+              <span class="status-pill"
+                    [ngClass]="{
+                      'status-success': t.status === 'approved',
+                      'status-warning': t.status === 'pending',
+                      'status-neutral': t.status === 'rejected'
+                    }">
+                <i class="fas" [class.fa-check]="t.status==='approved'" [class.fa-hourglass-half]="t.status==='pending'" [class.fa-xmark]="t.status==='rejected'"></i>
+                {{ t.status | titlecase }}
+              </span>
+            </td>
+            <td>
+              <ng-container *ngIf="t.status === 'approved'; else noDate">
+                {{ t.weekEnding | date:'MMM d, y' }}
+              </ng-container>
+              <ng-template #noDate> - </ng-template>
+            </td>
+            <td>
+              <button class="icon-btn primary" title="View"><i class="fas fa-eye"></i></button>
+              <button class="icon-btn success" title="Download"><i class="fas fa-download"></i></button>
+              <button class="icon-btn danger" title="Remind"><i class="fas fa-bell"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="pagination-wrap">
+        <button class="page-btn">Previous</button>
+        <button class="page-btn">1</button>
+        <button class="page-btn active">2</button>
+        <button class="page-btn">3</button>
+        <button class="page-btn">Next</button>
+      </div>
+    </div>
+  </div>
+</div>

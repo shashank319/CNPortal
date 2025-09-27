@@ -1,0 +1,166 @@
+<!-- Page Header -->
+<div class="add-employee">
+  <mat-toolbar color="transparent" class="page-toolbar">
+    <div class="toolbar-left">
+      <div class="title">Add New Employee</div>
+      <div class="subtitle">Enter the details of the new employee candidate</div>
+    </div>
+  </mat-toolbar>
+
+  <!-- Employee Form -->
+  <mat-card class="employee-form-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon class="form-icon">person_add</mat-icon>
+        Employee Information
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="employeeForm" (ngSubmit)="onSave()">
+        <!-- Personal Information Section -->
+        <div class="form-section">
+          <h3 class="section-title">Personal Information</h3>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>First Name</mat-label>
+              <input
+                matInput
+                formControlName="firstName"
+                placeholder="Enter first name"
+                autocomplete="given-name">
+              <mat-icon matSuffix>person</mat-icon>
+              <mat-error *ngIf="employeeForm.get('firstName')?.touched && employeeForm.get('firstName')?.errors">
+                {{ getFieldError('firstName') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Last Name</mat-label>
+              <input
+                matInput
+                formControlName="lastName"
+                placeholder="Enter last name"
+                autocomplete="family-name">
+              <mat-icon matSuffix>person</mat-icon>
+              <mat-error *ngIf="employeeForm.get('lastName')?.touched && employeeForm.get('lastName')?.errors">
+                {{ getFieldError('lastName') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Phone Number</mat-label>
+              <input
+                matInput
+                formControlName="phoneNumber"
+                placeholder="Enter phone number"
+                autocomplete="tel">
+              <mat-icon matSuffix>phone</mat-icon>
+              <mat-error *ngIf="employeeForm.get('phoneNumber')?.touched && employeeForm.get('phoneNumber')?.errors">
+                {{ getFieldError('phoneNumber') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Email Address</mat-label>
+              <input
+                matInput
+                type="email"
+                formControlName="email"
+                placeholder="Enter email address"
+                autocomplete="email">
+              <mat-icon matSuffix>email</mat-icon>
+              <mat-error *ngIf="employeeForm.get('email')?.touched && employeeForm.get('email')?.errors">
+                {{ getFieldError('email') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Professional Information Section -->
+        <div class="form-section">
+          <h3 class="section-title">Professional Information</h3>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Vendor Company</mat-label>
+              <mat-select formControlName="vendorCompany">
+                <mat-option value="">Select a vendor company</mat-option>
+                <mat-option *ngFor="let vendor of vendorCompanies" [value]="vendor">
+                  {{ vendor }}
+                </mat-option>
+              </mat-select>
+              <mat-icon matSuffix>business</mat-icon>
+              <mat-error *ngIf="employeeForm.get('vendorCompany')?.touched && employeeForm.get('vendorCompany')?.errors">
+                {{ getFieldError('vendorCompany') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Hourly Rate</mat-label>
+              <input
+                matInput
+                type="number"
+                formControlName="hourlyRate"
+                placeholder="Enter hourly rate"
+                min="15"
+                max="500"
+                step="0.01">
+              <span matTextPrefix>$&nbsp;</span>
+              <span matTextSuffix>&nbsp;/hr</span>
+              <mat-icon matSuffix>attach_money</mat-icon>
+              <mat-error *ngIf="employeeForm.get('hourlyRate')?.touched && employeeForm.get('hourlyRate')?.errors">
+                {{ getFieldError('hourlyRate') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button
+            type="button"
+            mat-stroked-button
+            (click)="onCancel()"
+            [disabled]="isLoading"
+            class="cancel-button">
+            <mat-icon>cancel</mat-icon>
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            mat-raised-button
+            color="primary"
+            [disabled]="employeeForm.invalid || isLoading"
+            class="save-button">
+            <mat-spinner *ngIf="isLoading" diameter="20" class="mr-8"></mat-spinner>
+            <mat-icon *ngIf="!isLoading">save</mat-icon>
+            {{ isLoading ? 'Saving...' : 'Save Employee' }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Information Card -->
+  <mat-card class="info-card">
+    <mat-card-content>
+      <div class="info-content">
+        <mat-icon class="info-icon">info</mat-icon>
+        <div class="info-text">
+          <h4>Important Notes</h4>
+          <ul>
+            <li>All fields marked with * are required</li>
+            <li>Phone number should include country code if international</li>
+            <li>Hourly rate should be between $15 and $500</li>
+            <li>Employee data will be saved for future timesheet tracking</li>
+          </ul>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

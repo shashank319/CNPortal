@@ -1,0 +1,148 @@
+<div class="auth-container min-h-100vh bg-primary flex align-center justify-center p-16">
+  <div class="login-container" style="width: 100%; max-width: 400px;">
+
+    <!-- Login Card -->
+    <mat-card class="login-card shadow-3">
+      <mat-card-header class="text-center">
+        <div class="login-header">
+          <mat-icon class="login-icon text-primary">business</mat-icon>
+          <mat-card-title class="mt-16 mb-8">
+            {{ activeTab === 'employer' ? 'Employer Portal' : 'Employee Portal' }}
+          </mat-card-title>
+          <mat-card-subtitle class="text-secondary">
+            Welcome back! Please sign in to your account.
+          </mat-card-subtitle>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content class="p-24">
+        <!-- User Type Tabs -->
+        <mat-tab-group
+          class="mb-24"
+          [selectedIndex]="activeTab === 'employer' ? 0 : 1"
+          (selectedTabChange)="switchTab($event.index === 0 ? 'employer' : 'employee')"
+          animationDuration="300ms">
+          <mat-tab label="Employer"></mat-tab>
+          <mat-tab label="Employee"></mat-tab>
+        </mat-tab-group>
+
+        <!-- Login Form -->
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+          <!-- Email Field -->
+          <mat-form-field appearance="outline" class="full-width mb-16">
+            <mat-label>Email</mat-label>
+            <input
+              matInput
+              type="email"
+              formControlName="email"
+              placeholder="Enter your email"
+              autocomplete="email">
+            <mat-icon matSuffix>email</mat-icon>
+            <mat-error *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.errors">
+              {{ getFieldError('email') }}
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Password Field -->
+          <mat-form-field appearance="outline" class="full-width mb-16">
+            <mat-label>Password</mat-label>
+            <input
+              matInput
+              type="password"
+              formControlName="password"
+              placeholder="Enter your password"
+              autocomplete="current-password">
+            <mat-icon matSuffix>lock</mat-icon>
+            <mat-error *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.errors">
+              {{ getFieldError('password') }}
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Remember Me and Forgot Password -->
+          <div class="flex space-between align-center mb-24">
+            <mat-checkbox formControlName="rememberMe" color="primary">
+              Remember me
+            </mat-checkbox>
+            <button type="button" mat-button color="primary" class="text-small">
+              Forgot Password?
+            </button>
+          </div>
+
+          <!-- Sign In Button -->
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            class="full-width mb-16"
+            [disabled]="isLoading">
+            <mat-spinner *ngIf="isLoading" diameter="20" class="mr-8"></mat-spinner>
+            {{ isLoading ? 'Signing In...' : 'Sign In' }}
+          </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="divider flex align-center mb-16">
+          <div class="divider-line"></div>
+          <span class="divider-text text-secondary text-small mx-16">or</span>
+          <div class="divider-line"></div>
+        </div>
+
+        <!-- Social Login Buttons -->
+        <div class="social-login gap-8">
+          <button
+            mat-stroked-button
+            color="primary"
+            class="full-width mb-8"
+            (click)="socialLogin('microsoft')"
+            [disabled]="isLoading">
+            <mat-icon class="mr-8">microsoft</mat-icon>
+            Continue with Microsoft
+          </button>
+
+          <button
+            mat-stroked-button
+            color="warn"
+            class="full-width mb-16"
+            (click)="socialLogin('google')"
+            [disabled]="isLoading">
+            <mat-icon class="mr-8">google</mat-icon>
+            Continue with Google
+          </button>
+        </div>
+
+        <!-- Create Account Link -->
+        <div class="text-center">
+          <button mat-button color="primary" routerLink="/auth/register" class="text-small">
+            Create Employer Account
+          </button>
+        </div>
+      </mat-card-content>
+
+      <!-- Footer Links -->
+      <mat-card-footer class="text-center p-16">
+        <div class="footer-links flex justify-center gap-16">
+          <button mat-button class="text-small">Terms</button>
+          <button mat-button class="text-small">Privacy</button>
+          <button mat-button class="text-small">Contact</button>
+        </div>
+      </mat-card-footer>
+    </mat-card>
+
+    <!-- Demo Credentials Info -->
+    <mat-card class="demo-credentials mt-16 shadow-1">
+      <mat-card-header>
+        <mat-card-title class="text-small font-medium">Demo Credentials</mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="text-small">
+        <div class="mb-8">
+          <strong>Employer:</strong><br>
+          employer{{ '@' }}test.com / password
+        </div>
+        <div>
+          <strong>Employee:</strong><br>
+          employee{{ '@' }}test.com / password
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

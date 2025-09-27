@@ -1,0 +1,253 @@
+.edit-employee-container {
+  padding: 1rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Page Header */
+.page-toolbar {
+  background: transparent !important;
+  padding: 0 0 1rem 0;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.back-button {
+  background-color: #f5f5f5;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.title-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.25rem;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+/* Form Card */
+.form-card {
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin-top: 1rem;
+}
+
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Form Sections */
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Form Layout */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-field {
+  width: 100%;
+}
+
+/* Action Buttons */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.cancel-btn {
+  min-width: 120px;
+  height: 44px;
+  border: 1px solid #ddd;
+  color: #666;
+  font-weight: 500;
+}
+
+.cancel-btn:hover {
+  background-color: #f5f5f5;
+  border-color: #bbb;
+}
+
+.save-btn {
+  min-width: 140px;
+  height: 44px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(25, 118, 210, 0.2);
+}
+
+.save-btn:hover {
+  box-shadow: 0 4px 8px rgba(25, 118, 210, 0.3);
+  transform: translateY(-1px);
+}
+
+.save-btn:disabled {
+  background-color: #ccc !important;
+  color: #999 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.loading-content {
+  text-align: center;
+  color: #666;
+}
+
+.loading-icon {
+  font-size: 3rem;
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 1rem;
+  color: #1976d2;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Form Field Customizations */
+.mat-mdc-form-field {
+  font-size: 0.875rem;
+}
+
+.mat-mdc-form-field .mat-mdc-form-field-label {
+  font-weight: 500;
+}
+
+.mat-mdc-form-field.mat-focused .mat-mdc-form-field-label {
+  color: #1976d2;
+}
+
+/* Error States */
+.mat-mdc-form-field.mat-form-field-invalid .mat-mdc-text-field-wrapper {
+  background-color: #fff5f5;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .edit-employee-container {
+    padding: 0.5rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar-left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .title {
+    font-size: 1.25rem;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+  }
+
+  .cancel-btn,
+  .save-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-toolbar {
+    padding: 0 0 0.5rem 0;
+  }
+
+  .form-section {
+    gap: 0.75rem;
+  }
+
+  .section-title {
+    font-size: 1rem;
+  }
+}
+
+/* Focus and Hover Effects */
+.form-field:focus-within {
+  transform: translateY(-1px);
+  transition: transform 0.2s ease;
+}
+
+.mat-mdc-form-field:not(.mat-form-field-disabled):hover .mat-mdc-text-field-wrapper {
+  background-color: #f8f9fa;
+}
+
+/* Custom Select Dropdown */
+.mat-mdc-select-panel {
+  border-radius: 0.5rem;
+}
+
+/* Button Animations */
+.cancel-btn,
+.save-btn {
+  transition: all 0.2s ease;
+}
+
+/* Success State for Valid Fields */
+.mat-mdc-form-field.ng-valid.ng-touched:not(.mat-form-field-invalid) .mat-mdc-text-field-wrapper {
+  border-color: #4caf50;
+}
+
+/* Custom Hint Text */
+.mat-mdc-form-field .mat-mdc-form-field-hint {
+  color: #666;
+  font-size: 0.75rem;
+}

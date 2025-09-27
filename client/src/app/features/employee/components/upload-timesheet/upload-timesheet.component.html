@@ -1,0 +1,162 @@
+<!-- Page Header -->
+<div class="upload-timesheet">
+  <mat-toolbar color="transparent" class="page-toolbar">
+    <div class="toolbar-left">
+      <div class="title">Upload Timesheet</div>
+      <div class="subtitle">Submit your timesheet for the selected period</div>
+    </div>
+  </mat-toolbar>
+
+  <!-- Upload Form -->
+  <mat-card class="upload-card">
+    <mat-card-content>
+      <form [formGroup]="uploadForm" (ngSubmit)="onSubmit()">
+        <!-- File Upload Section -->
+        <div class="upload-section">
+          <div class="upload-zone"
+               [class.dragover]="isDragOver"
+               (dragover)="onDragOver($event)"
+               (dragleave)="onDragLeave($event)"
+               (drop)="onDrop($event)"
+               (click)="fileInput.click()">
+
+            <input #fileInput
+                   type="file"
+                   hidden
+                   accept=".pdf,.doc,.docx,.xls,.xlsx"
+                   (change)="onFileSelected($event)">
+
+            <div class="upload-icon">
+              <mat-icon>cloud_upload</mat-icon>
+            </div>
+
+            <div class="upload-content">
+              <h3>Drop your timesheet here</h3>
+              <p>or click to browse files</p>
+              <button type="button" mat-stroked-button color="primary" class="browse-button">
+                Browse Files
+              </button>
+            </div>
+          </div>
+
+          <!-- File Information -->
+          <div *ngIf="selectedFile" class="file-info">
+            <div class="file-details">
+              <mat-icon>description</mat-icon>
+              <div class="file-meta">
+                <div class="file-name">{{ selectedFile.name }}</div>
+                <div class="file-size">{{ formatFileSize(selectedFile.size) }}</div>
+              </div>
+              <button type="button"
+                      mat-icon-button
+                      color="warn"
+                      (click)="removeFile()"
+                      matTooltip="Remove file">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- Supported Formats -->
+          <div class="supported-formats">
+            <small class="text-muted">
+              Supported formats: PDF, DOC, DOCX, XLS, XLSX (Max 10MB)
+            </small>
+          </div>
+        </div>
+
+        <!-- Time Period Selection -->
+        <div class="form-section">
+          <h3 class="section-title">Select Time Period</h3>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Time Period</mat-label>
+            <mat-select formControlName="timePeriod" required>
+              <mat-option value="2025-01">January 2025</mat-option>
+              <mat-option value="2024-12">December 2024</mat-option>
+              <mat-option value="2024-11">November 2024</mat-option>
+              <mat-option value="2024-10">October 2024</mat-option>
+              <mat-option value="2024-09">September 2024</mat-option>
+            </mat-select>
+            <mat-error *ngIf="uploadForm.get('timePeriod')?.touched && uploadForm.get('timePeriod')?.errors?.['required']">
+              Time period is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="form-section">
+          <h3 class="section-title">Additional Information (Optional)</h3>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Comments</mat-label>
+            <textarea matInput
+                      formControlName="comments"
+                      placeholder="Add any comments about this timesheet..."
+                      rows="3"></textarea>
+          </mat-form-field>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-actions">
+          <button type="button"
+                  mat-stroked-button
+                  routerLink="/employee/dashboard"
+                  [disabled]="isUploading">
+            Cancel
+          </button>
+
+          <button type="submit"
+                  mat-raised-button
+                  color="primary"
+                  [disabled]="!selectedFile || uploadForm.invalid || isUploading">
+            <mat-spinner *ngIf="isUploading" diameter="20" class="mr-8"></mat-spinner>
+            {{ isUploading ? 'Submitting...' : 'Submit Timesheet' }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Upload Progress -->
+  <mat-card *ngIf="uploadProgress > 0 && uploadProgress < 100" class="progress-card">
+    <mat-card-content>
+      <div class="progress-header">
+        <span>Uploading timesheet...</span>
+        <span>{{ uploadProgress }}%</span>
+      </div>
+      <mat-progress-bar [value]="uploadProgress" mode="determinate"></mat-progress-bar>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Recent Submissions -->
+  <mat-card class="recent-submissions" *ngIf="recentSubmissions.length > 0">
+    <mat-card-header>
+      <mat-card-title>Recent Submissions</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="submission-list">
+        <div *ngFor="let submission of recentSubmissions" class="submission-item">
+          <div class="submission-info">
+            <div class="submission-period">{{ submission.period }}</div>
+            <div class="submission-date">{{ submission.submittedDate | date:'MMM d, yyyy' }}</div>
+          </div>
+
+          <div class="submission-status">
+            <mat-chip [class]="'status-' + submission.status" selected>
+              <mat-icon>{{ getStatusIcon(submission.status) }}</mat-icon>
+              {{ submission.status | titlecase }}
+            </mat-chip>
+          </div>
+
+          <div class="submission-actions">
+            <button mat-icon-button matTooltip="Download">
+              <mat-icon>download</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

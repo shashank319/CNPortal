@@ -1,0 +1,131 @@
+<div class="edit-employee-container">
+  <!-- Page Header -->
+  <mat-toolbar color="transparent" class="page-toolbar">
+    <div class="toolbar-left">
+      <button mat-icon-button (click)="onCancel()" class="back-button">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="title-section">
+        <div class="title">Edit Employee</div>
+        <div class="subtitle" *ngIf="candidate">
+          Update {{ candidate.firstName }} {{ candidate.lastName }}'s information
+        </div>
+      </div>
+    </div>
+  </mat-toolbar>
+
+  <!-- Edit Form -->
+  <mat-card class="form-card">
+    <mat-card-content>
+      <form [formGroup]="employeeForm" (ngSubmit)="onSave()" *ngIf="!isLoading">
+        <div class="form-grid">
+          <!-- Personal Information Section -->
+          <div class="form-section">
+            <h3 class="section-title">Personal Information</h3>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>First Name</mat-label>
+                <input matInput formControlName="firstName" placeholder="Enter first name">
+                <mat-error *ngIf="employeeForm.get('firstName')?.touched && employeeForm.get('firstName')?.invalid">
+                  {{ getErrorMessage('firstName') }}
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Last Name</mat-label>
+                <input matInput formControlName="lastName" placeholder="Enter last name">
+                <mat-error *ngIf="employeeForm.get('lastName')?.touched && employeeForm.get('lastName')?.invalid">
+                  {{ getErrorMessage('lastName') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Phone Number</mat-label>
+                <input matInput formControlName="phoneNumber" placeholder="Enter phone number">
+                <mat-error *ngIf="employeeForm.get('phoneNumber')?.touched && employeeForm.get('phoneNumber')?.invalid">
+                  {{ getErrorMessage('phoneNumber') }}
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Email Address</mat-label>
+                <input matInput type="email" formControlName="email" placeholder="Enter email address">
+                <mat-error *ngIf="employeeForm.get('email')?.touched && employeeForm.get('email')?.invalid">
+                  {{ getErrorMessage('email') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Work Information Section -->
+          <div class="form-section">
+            <h3 class="section-title">Work Information</h3>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Vendor Company</mat-label>
+                <input matInput formControlName="clientName" placeholder="Enter vendor company">
+                <mat-error *ngIf="employeeForm.get('clientName')?.touched && employeeForm.get('clientName')?.invalid">
+                  {{ getErrorMessage('clientName') }}
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Hourly Rate</mat-label>
+                <input matInput type="number" formControlName="hourlyRate" placeholder="Enter hourly rate">
+                <span matTextPrefix>$</span>
+                <span matTextSuffix>/hr</span>
+                <mat-error *ngIf="employeeForm.get('hourlyRate')?.touched && employeeForm.get('hourlyRate')?.invalid">
+                  {{ getErrorMessage('hourlyRate') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Status</mat-label>
+                <mat-select formControlName="status">
+                  <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+                    {{ status.label }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="employeeForm.get('status')?.touched && employeeForm.get('status')?.invalid">
+                  {{ getErrorMessage('status') }}
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="form-field">
+                <mat-label>Skills</mat-label>
+                <input matInput formControlName="skills" placeholder="Enter skills (comma separated)">
+                <mat-hint>Separate multiple skills with commas</mat-hint>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+          <button mat-button type="button" (click)="onCancel()" class="cancel-btn">
+            <mat-icon>close</mat-icon>
+            Cancel
+          </button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="employeeForm.invalid || isLoading" class="save-btn">
+            <mat-icon>save</mat-icon>
+            Save Changes
+          </button>
+        </div>
+      </form>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="loading-container">
+        <div class="loading-content">
+          <mat-icon class="loading-icon">hourglass_empty</mat-icon>
+          <p>Loading employee information...</p>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

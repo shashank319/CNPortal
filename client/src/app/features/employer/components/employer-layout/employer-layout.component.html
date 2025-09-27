@@ -1,0 +1,74 @@
+<mat-sidenav-container class="employer-layout-container">
+  <!-- Sidebar -->
+  <mat-sidenav #sidenav mode="side" opened="true" class="sidenav">
+    <mat-toolbar class="sidenav-header bg-primary text-white">
+      <mat-icon class="mr-8">business</mat-icon>
+      <span *ngIf="!sidebarCollapsed">Employer Portal</span>
+    </mat-toolbar>
+
+    <mat-nav-list class="sidenav-nav">
+      <mat-list-item
+        *ngFor="let item of menuItems"
+        [class.active]="item.active"
+        (click)="navigateTo(item.route)"
+        class="nav-item">
+        <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+        <span matListItemTitle *ngIf="!sidebarCollapsed">{{ item.label }}</span>
+      </mat-list-item>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <!-- Main Content -->
+  <mat-sidenav-content class="main-content">
+    <!-- Top Navigation -->
+    <mat-toolbar class="top-toolbar bg-white" color="primary">
+      <button
+        mat-icon-button
+        (click)="toggleSidebar(); sidenav.toggle()"
+        class="sidebar-toggle">
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <span class="toolbar-spacer"></span>
+
+      <!-- Notifications -->
+      <button mat-icon-button class="mr-16">
+        <mat-icon matBadge="3" matBadgeColor="warn" matBadgeSize="small">notifications</mat-icon>
+      </button>
+
+      <!-- User Menu -->
+      <button mat-button [matMenuTriggerFor]="userMenu" class="user-menu-button">
+        <div class="user-info flex align-center">
+          <div class="user-details text-right mr-8">
+            <div class="user-name text-small font-medium">{{ currentUser?.fullName }}</div>
+            <div class="user-role text-small text-secondary">Employer</div>
+          </div>
+          <div class="user-avatar bg-primary text-white rounded-circle flex align-center justify-center">
+            {{ currentUser?.fullName?.charAt(0) }}
+          </div>
+        </div>
+      </button>
+
+      <mat-menu #userMenu="matMenu" class="user-dropdown">
+        <button mat-menu-item (click)="navigateTo('/employer/profile')">
+          <mat-icon>person</mat-icon>
+          <span>My Profile</span>
+        </button>
+        <button mat-menu-item>
+          <mat-icon>settings</mat-icon>
+          <span>Settings</span>
+        </button>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="logout()" class="text-danger">
+          <mat-icon>exit_to_app</mat-icon>
+          <span>Logout</span>
+        </button>
+      </mat-menu>
+    </mat-toolbar>
+
+    <!-- Page Content -->
+    <div class="content-wrapper p-24">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

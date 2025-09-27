@@ -1,0 +1,235 @@
+/* You can add global styles to this file, and also import other style files */
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* Global Material Design overrides */
+.mat-mdc-card {
+  border-radius: 8px !important;
+}
+
+.mat-mdc-button {
+  border-radius: 6px !important;
+}
+
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+/* Utility classes */
+.full-width {
+  width: 100%;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.margin-top {
+  margin-top: 16px;
+}
+
+.margin-bottom {
+  margin-bottom: 16px;
+}
+
+.padding {
+  padding: 16px;
+}
+
+/* Layout helpers */
+.flex {
+  display: flex;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.space-between {
+  justify-content: space-between;
+}
+
+.gap-8 {
+  gap: 8px;
+}
+
+.gap-16 {
+  gap: 16px;
+}
+
+.gap-24 {
+  gap: 24px;
+}
+
+/* Height utilities */
+.h-100 {
+  height: 100%;
+}
+
+.min-h-100vh {
+  min-height: 100vh;
+}
+
+/* Background utilities */
+.bg-primary {
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+}
+
+.bg-white {
+  background-color: white;
+}
+
+.bg-grey-50 {
+  background-color: #fafafa;
+}
+
+.bg-grey-100 {
+  background-color: #f5f5f5;
+}
+
+/* Text utilities */
+.text-primary {
+  color: #1976d2;
+}
+
+.text-secondary {
+  color: #666;
+}
+
+.text-white {
+  color: white;
+}
+
+.text-small {
+  font-size: 0.875rem;
+}
+
+.text-large {
+  font-size: 1.125rem;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+/* Spacing utilities */
+.m-0 { margin: 0; }
+.m-8 { margin: 8px; }
+.m-16 { margin: 16px; }
+.m-24 { margin: 24px; }
+
+.mt-0 { margin-top: 0; }
+.mt-8 { margin-top: 8px; }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+
+.mb-0 { margin-bottom: 0; }
+.mb-8 { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-24 { margin-bottom: 24px; }
+
+.ml-0 { margin-left: 0; }
+.ml-8 { margin-left: 8px; }
+.ml-16 { margin-left: 16px; }
+.ml-24 { margin-left: 24px; }
+
+.mr-0 { margin-right: 0; }
+.mr-8 { margin-right: 8px; }
+.mr-16 { margin-right: 16px; }
+.mr-24 { margin-right: 24px; }
+
+.p-0 { padding: 0; }
+.p-8 { padding: 8px; }
+.p-16 { padding: 16px; }
+.p-24 { padding: 24px; }
+.p-32 { padding: 32px; }
+
+.pt-0 { padding-top: 0; }
+.pt-8 { padding-top: 8px; }
+.pt-16 { padding-top: 16px; }
+.pt-24 { padding-top: 24px; }
+
+.pb-0 { padding-bottom: 0; }
+.pb-8 { padding-bottom: 8px; }
+.pb-16 { padding-bottom: 16px; }
+.pb-24 { padding-bottom: 24px; }
+
+.pl-0 { padding-left: 0; }
+.pl-8 { padding-left: 8px; }
+.pl-16 { padding-left: 16px; }
+.pl-24 { padding-left: 24px; }
+
+.pr-0 { padding-right: 0; }
+.pr-8 { padding-right: 8px; }
+.pr-16 { padding-right: 16px; }
+.pr-24 { padding-right: 24px; }
+
+/* Box shadow utilities */
+.shadow-1 {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+.shadow-2 {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}
+
+.shadow-3 {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+}
+
+/* Border radius utilities */
+.rounded {
+  border-radius: 4px;
+}
+
+.rounded-lg {
+  border-radius: 8px;
+}
+
+.rounded-xl {
+  border-radius: 12px;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .p-mobile-8 {
+    padding: 8px !important;
+  }
+
+  .p-mobile-16 {
+    padding: 16px !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .hide-desktop {
+    display: none !important;
+  }
+}

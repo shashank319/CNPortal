@@ -1,0 +1,207 @@
+<!-- Page Header -->
+<div class="timesheets-management">
+  <mat-toolbar color="transparent" class="page-toolbar">
+    <div class="toolbar-left">
+      <div class="title">Timesheets Management</div>
+      <div class="subtitle">Submit your timesheet for the selected period</div>
+    </div>
+  </mat-toolbar>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid mb-24">
+    <mat-card class="stat-card success">
+      <div class="stat">
+        <div class="stat-icon success">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <div class="stat-body">
+          <div class="value">{{ stats.submitted }}</div>
+          <div class="label">Submitted</div>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card warning">
+      <div class="stat">
+        <div class="stat-icon warning">
+          <mat-icon>schedule</mat-icon>
+        </div>
+        <div class="stat-body">
+          <div class="value">{{ stats.pending }}</div>
+          <div class="label">Pending</div>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card info">
+      <div class="stat">
+        <div class="stat-icon info">
+          <mat-icon>access_time</mat-icon>
+        </div>
+        <div class="stat-body">
+          <div class="value">{{ stats.totalHours | number }}</div>
+          <div class="label">Total Hours</div>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card primary">
+      <div class="stat">
+        <div class="stat-icon primary">
+          <mat-icon>groups</mat-icon>
+        </div>
+        <div class="stat-body">
+          <div class="value">{{ stats.activeCandidates }}</div>
+          <div class="label">Active Candidates</div>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- Filters and Actions -->
+  <mat-card class="filter-card mb-24">
+    <mat-card-content>
+      <div class="filter-row">
+        <div class="filters">
+          <mat-form-field appearance="outline">
+            <mat-label>Filter by Month</mat-label>
+            <mat-select [(value)]="selectedMonth" (selectionChange)="onFilterChange()">
+              <mat-option value="2025-01">January 2025</mat-option>
+              <mat-option value="2024-12">December 2024</mat-option>
+              <mat-option value="2024-11">November 2024</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Status</mat-label>
+            <mat-select [(value)]="selectedStatus" (selectionChange)="onFilterChange()">
+              <mat-option value="">All Status</mat-option>
+              <mat-option value="submitted">Submitted</mat-option>
+              <mat-option value="pending">Pending</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="actions">
+          <button mat-raised-button color="primary" (click)="exportTimesheets()">
+            <mat-icon>file_download</mat-icon>
+            Export
+          </button>
+          <button mat-stroked-button (click)="refreshData()">
+            <mat-icon>refresh</mat-icon>
+            Refresh
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Timesheets Table -->
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Timesheet Overview</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="table-wrapper">
+        <table mat-table [dataSource]="dataSource" class="timesheet-table">
+          <!-- Candidate Name Column -->
+          <ng-container matColumnDef="candidateName">
+            <th mat-header-cell *matHeaderCellDef>CANDIDATE NAME</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="candidate-cell">
+                <div class="candidate-avatar">
+                  {{ element.candidateName.charAt(0) }}
+                </div>
+                <div class="candidate-info">
+                  <div class="candidate-name">{{ element.candidateName }}</div>
+                  <div class="candidate-email">{{ element.email }}</div>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Month Column -->
+          <ng-container matColumnDef="month">
+            <th mat-header-cell *matHeaderCellDef>MONTH</th>
+            <td mat-cell *matCellDef="let element">{{ element.month }}</td>
+          </ng-container>
+
+          <!-- Hours Logged Column -->
+          <ng-container matColumnDef="hoursLogged">
+            <th mat-header-cell *matHeaderCellDef>HOURS LOGGED</th>
+            <td mat-cell *matCellDef="let element">
+              <span *ngIf="element.hoursLogged; else noHours">{{ element.hoursLogged }} hrs</span>
+              <ng-template #noHours>—</ng-template>
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>STATUS</th>
+            <td mat-cell *matCellDef="let element">
+              <mat-chip
+                [class]="'status-chip status-' + element.status"
+                selected>
+                <mat-icon>{{ getStatusIcon(element.status) }}</mat-icon>
+                {{ element.status | titlecase }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Submitted Date Column -->
+          <ng-container matColumnDef="submittedDate">
+            <th mat-header-cell *matHeaderCellDef>SUBMITTED DATE</th>
+            <td mat-cell *matCellDef="let element">
+              <span *ngIf="element.submittedDate; else notSubmitted">
+                {{ element.submittedDate | date:'MMM d, yyyy' }}
+              </span>
+              <ng-template #notSubmitted>—</ng-template>
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>ACTIONS</th>
+            <td mat-cell *matCellDef="let element">
+              <button mat-icon-button color="primary" matTooltip="View Details" (click)="viewTimesheet(element)">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button mat-icon-button color="primary" matTooltip="Download" (click)="downloadTimesheet(element)">
+                <mat-icon>download</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                color="warn"
+                matTooltip="Send Reminder"
+                (click)="sendReminder(element)"
+                *ngIf="element.status === 'pending'">
+                <mat-icon>notification_important</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        <!-- Empty State -->
+        <div *ngIf="dataSource.data.length === 0" class="empty-state">
+          <mat-icon>schedule</mat-icon>
+          <h3>No timesheets found</h3>
+          <p>No timesheets match your current filters.</p>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <mat-paginator
+        [length]="totalItems"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [pageSizeOptions]="[5, 10, 20]"
+        (page)="onPageChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,220 @@
+<!-- Page Header -->
+<mat-toolbar color="transparent" class="page-toolbar" role="heading" aria-level="1">
+  <div class="toolbar-left">
+    <div class="title">Dashboard</div>
+    <div class="subtitle">Welcome to your employer portal overview</div>
+  </div>
+  <!-- Removed Add New Candidate button from dashboard header -->
+</mat-toolbar>
+
+
+
+<!-- Dashboard KPIs (Top 4 Cards) -->
+<div class="stats-grid">
+  <mat-card class="stat-tile success">
+    <div class="stat">
+      <div class="stat__icon success"><mat-icon>check_circle</mat-icon></div>
+      <div class="stat__body">
+        <div class="value">{{ timesheetSummary.totalSubmitted }}</div>
+        <div class="label">Submitted</div>
+      </div>
+    </div>
+  </mat-card>
+  <mat-card class="stat-tile warning">
+    <div class="stat">
+      <div class="stat__icon warning"><mat-icon>schedule</mat-icon></div>
+      <div class="stat__body">
+        <div class="value">{{ timesheetSummary.totalPending }}</div>
+        <div class="label">Pending</div>
+      </div>
+    </div>
+  </mat-card>
+  <mat-card class="stat-tile info">
+    <div class="stat">
+      <div class="stat__icon info"><mat-icon>calendar_month</mat-icon></div>
+      <div class="stat__body">
+        <div class="value">{{ timesheetSummary.totalHours | number }}</div>
+        <div class="label">Total Hours</div>
+      </div>
+    </div>
+  </mat-card>
+  <mat-card class="stat-tile primary">
+    <div class="stat">
+      <div class="stat__icon primary"><mat-icon>groups</mat-icon></div>
+      <div class="stat__body">
+        <div class="value">{{ timesheetSummary.activeCandidates }}</div>
+        <div class="label">Active Candidates</div>
+      </div>
+    </div>
+  </mat-card>
+</div>
+
+<div class="content-grid">
+  <!-- Timesheets Management -->
+  <mat-card class="panel">
+    <mat-card-header>
+      <mat-card-title>Timesheets Management</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- ...existing code... (remove mini-kpis row) -->
+
+      <!-- Toolbar: filters + actions -->
+      <div class="panel-toolbar">
+        <div class="filters">
+          <mat-form-field appearance="outline">
+            <mat-label>Month</mat-label>
+            <mat-select [(value)]="selectedMonth">
+              <mat-option value="2025-01">January 2025</mat-option>
+              <mat-option value="2024-12">December 2024</mat-option>
+              <mat-option value="2024-11">November 2024</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Status</mat-label>
+            <mat-select [(value)]="selectedStatus">
+              <mat-option value="">All Status</mat-option>
+              <mat-option value="submitted">Submitted</mat-option>
+              <mat-option value="pending">Pending</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="actions">
+          <button mat-raised-button color="primary" (click)="exportData()">
+            <mat-icon>download</mat-icon>
+            Export
+          </button>
+          <button mat-stroked-button (click)="refreshData()">
+            <mat-icon>refresh</mat-icon>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Table (Material) -->
+      <div class="table-wrap">
+  <table mat-table [dataSource]="pagedTimesheets" class="mat-elevation-z0">
+
+          <ng-container matColumnDef="candidate">
+            <th mat-header-cell *matHeaderCellDef> Candidate Name </th>
+            <td mat-cell *matCellDef="let t">
+              <div class="user-text">
+                <div class="name">{{ t.candidateName }}</div>
+                <div class="email">{{ t.email }}</div>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="month">
+            <th mat-header-cell *matHeaderCellDef> Month </th>
+            <td mat-cell *matCellDef="let t"> December 2024 </td>
+          </ng-container>
+
+          <ng-container matColumnDef="hours">
+            <th mat-header-cell *matHeaderCellDef> Hours Logged </th>
+            <td mat-cell *matCellDef="let t">
+              {{ t.totalHours || '—' }} <span *ngIf="t.totalHours">hrs</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef> Status </th>
+            <td mat-cell *matCellDef="let t">
+              <mat-chip-set>
+                <mat-chip
+                  [color]="t.status==='approved' ? 'primary' : (t.status==='pending' ? 'warn' : undefined)"
+                  [class.chip-success]="t.status==='approved'"
+                  [class.chip-warning]="t.status==='pending'"
+                  [class.chip-neutral]="t.status==='rejected'"
+                  selected>
+                  <mat-icon inline>{{ t.status==='approved' ? 'check' : (t.status==='pending' ? 'schedule' : 'close') }}</mat-icon>
+                  {{ t.status | titlecase }}
+                </mat-chip>
+              </mat-chip-set>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="submitted">
+            <th mat-header-cell *matHeaderCellDef> Submitted Date </th>
+            <td mat-cell *matCellDef="let t">
+              <ng-container *ngIf="t.status==='approved'; else dash">
+                {{ t.weekEnding | date:'MMM d, y' }}
+              </ng-container>
+              <ng-template #dash>—</ng-template>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef> Actions </th>
+            <td mat-cell *matCellDef="let t">
+              <button mat-icon-button color="primary" matTooltip="View">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button mat-icon-button color="primary" matTooltip="Download">
+                <mat-icon>download</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" matTooltip="Remind">
+                <mat-icon>notifications_active</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="['candidate','month','hours','status','submitted','actions']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['candidate','month','hours','status','submitted','actions'];"></tr>
+        </table>
+
+        <mat-divider></mat-divider>
+
+        <mat-paginator
+          [length]="recentTimesheets.length"
+          [pageSize]="pageSize"
+          [pageIndex]="pageIndex"
+          [pageSizeOptions]="[5]"
+          (page)="onPageChange($event)">
+        </mat-paginator>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+
+  <!-- Action Cards -->
+  <div class="actions-grid">
+    <mat-card class="action-card primary">
+      <mat-card-content class="center">
+        <mat-icon class="hero primary">person_add</mat-icon>
+        <div class="action-title">Manage Candidates</div>
+        <div class="muted">Add, edit, and track candidate information and status</div>
+        <button mat-raised-button color="primary" (click)="goToCandidates()">
+          <mat-icon>arrow_forward</mat-icon>
+          Go to Candidates
+        </button>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="action-card success">
+      <mat-card-content class="center">
+        <mat-icon class="hero success">schedule</mat-icon>
+        <div class="action-title">Review Timesheets</div>
+        <div class="muted">Review and approve submitted timesheets from candidates</div>
+        <button mat-raised-button color="accent" (click)="goToTimesheets()">
+          <mat-icon>arrow_forward</mat-icon>
+          Review Timesheets
+        </button>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="action-card info">
+      <mat-card-content class="center">
+        <mat-icon class="hero info">account_circle</mat-icon>
+        <div class="action-title">Update Profile</div>
+        <div class="muted">Manage your account settings and company information</div>
+        <button mat-raised-button color="primary" (click)="goToProfile()">
+          <mat-icon>arrow_forward</mat-icon>
+          Edit Profile
+        </button>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
