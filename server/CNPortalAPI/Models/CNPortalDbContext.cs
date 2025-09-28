@@ -13,6 +13,7 @@ namespace CNPortalAPI.Models
         public DbSet<Vendor> Vendors { get; set; }
         public DbSet<MasterTimeSheet> MasterTimeSheets { get; set; }
         public DbSet<EveryDayTimesheet> EveryDayTimesheets { get; set; }
+        public DbSet<Candidate> Candidates { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -24,10 +25,15 @@ namespace CNPortalAPI.Models
             modelBuilder.Entity<Vendor>().ToTable("Vendor");
             modelBuilder.Entity<MasterTimeSheet>().ToTable("MasterTimeSheet");
             modelBuilder.Entity<EveryDayTimesheet>().ToTable("EveryDayTimesheet");
+            modelBuilder.Entity<Candidate>().ToTable("Candidate");
 
             // Configure unique constraints
             modelBuilder.Entity<Employee>()
                 .HasIndex(e => e.Email)
+                .IsUnique();
+
+            modelBuilder.Entity<Candidate>()
+                .HasIndex(c => c.Email)
                 .IsUnique();
 
             // Configure relationships
@@ -73,6 +79,12 @@ namespace CNPortalAPI.Models
                 .HasForeignKey(e => e.IndexID)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            modelBuilder.Entity<Candidate>()
+                .HasOne(c => c.Employer)
+                .WithMany()
+                .HasForeignKey(c => c.EmployerID)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // Seed data for Identity roles
             modelBuilder.Entity<Identity>().HasData(
                 new Identity { IdentityID = 1, Role = "Emp" },
@@ -83,7 +95,7 @@ namespace CNPortalAPI.Models
 
             // Seed data for test employees (without VendorID initially)
             // All passwords are: Test@123 (hashed)
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword("Test@123");
+            var hashedPassword = "$2a$11$J9FqGRgOKv3KqF7tF1EHQOyE.n3aV8VsJCJQXY9/8jGF4JGFVqJ8i";
 
             modelBuilder.Entity<Employee>().HasData(
                 new Employee

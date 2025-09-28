@@ -1,4 +1,15 @@
+# IDE-specific
+server/CNPortalAPI/.vs/
+server/CNPortalAPI/*.csproj.user
+
+# Build artifacts
+server/CNPortalAPI/bin/
+server/CNPortalAPI/obj/
+
+# Angular
 client/node_modules/
 client/dist/
+
+# Other
 server/node_modules/
 server/dist/

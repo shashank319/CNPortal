@@ -79,17 +79,22 @@ export class EditEmployeeComponent implements OnInit {
   }
 
   private loadCandidate(): void {
-    this.isLoading = true;
-    const candidates = this.candidateService.getCandidates();
-    this.candidate = candidates.find(c => c.id === this.candidateId) || null;
+    if (!this.candidateId) return;
 
-    if (this.candidate) {
-      this.populateForm();
-    } else {
-      this.snackBar.open('Candidate not found', 'Close', { duration: 3000 });
-      this.router.navigate(['/employer/candidates']);
-    }
-    this.isLoading = false;
+    this.isLoading = true;
+    this.candidateService.getCandidate(Number(this.candidateId)).subscribe({
+      next: (candidate) => {
+        this.candidate = candidate;
+        this.populateForm();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading candidate:', error);
+        this.snackBar.open('Candidate not found', 'Close', { duration: 3000 });
+        this.router.navigate(['/employer/candidates']);
+        this.isLoading = false;
+      }
+    });
   }
 
   private populateForm(): void {
@@ -102,7 +107,7 @@ export class EditEmployeeComponent implements OnInit {
         clientName: this.candidate.clientName,
         hourlyRate: this.candidate.hourlyRate,
         status: this.candidate.status,
-        skills: this.candidate.skills?.join(', ') || ''
+        skills: this.candidate.skills || ''
       });
     }
   }
@@ -120,7 +125,7 @@ export class EditEmployeeComponent implements OnInit {
         clientName: formData.clientName,
         hourlyRate: parseFloat(formData.hourlyRate),
         status: formData.status,
-        skills: formData.skills ? formData.skills.split(',').map((s: string) => s.trim()).filter((s: string) => s) : []
+        skills: formData.skills || ''
       };
 
       // In a real application, this would call a service method to update the candidate

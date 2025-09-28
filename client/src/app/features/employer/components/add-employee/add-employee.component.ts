@@ -11,6 +11,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
+import { CandidateService } from '../../../../shared/services/candidate.service';
+import { CreateCandidateRequest } from '../../../../core/models/candidate.model';
 
 @Component({
   selector: 'app-add-employee',
@@ -49,7 +51,8 @@ export class AddEmployeeComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private candidateService: CandidateService
   ) {}
 
   ngOnInit(): void {
@@ -63,7 +66,10 @@ export class AddEmployeeComponent implements OnInit {
       phoneNumber: ['', [Validators.required, Validators.pattern(/^\+?[\d\s\-\(\)]+$/)]],
       email: ['', [Validators.required, Validators.email]],
       vendorCompany: ['', [Validators.required]],
-      hourlyRate: ['', [Validators.required, Validators.min(15), Validators.max(500)]]
+      hourlyRate: ['', [Validators.required, Validators.min(15), Validators.max(500)]],
+      skills: [''],
+      experience: [0, [Validators.min(0)]],
+      notes: ['']
     });
   }
 
@@ -71,23 +77,40 @@ export class AddEmployeeComponent implements OnInit {
     if (this.employeeForm.valid) {
       this.isLoading = true;
 
-      const employeeData = this.employeeForm.value;
+      const formData = this.employeeForm.value;
 
-      // Simulate API call to save employee
-      setTimeout(() => {
-        this.isLoading = false;
+      // Create candidate request object
+      const candidateRequest: CreateCandidateRequest = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        clientName: formData.vendorCompany,
+        skills: formData.skills || '',
+        experience: formData.experience || 0,
+        notes: formData.notes || '',
+        hourlyRate: formData.hourlyRate
+      };
 
-        console.log('Employee data to be saved:', employeeData);
-
-        this.snackBar.open('Employee added successfully!', 'Close', {
-          duration: 3000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top'
-        });
-
-        // Navigate back to candidates list
-        this.router.navigate(['/employer/candidates']);
-      }, 1500);
+      this.candidateService.createCandidate(candidateRequest).subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          this.snackBar.open('Candidate added successfully!', 'Close', {
+            duration: 3000,
+            horizontalPosition: 'center',
+            verticalPosition: 'top'
+          });
+          // Navigate back to candidates list
+          this.router.navigate(['/employer/candidates']);
+        },
+        error: (error) => {
+          this.isLoading = false;
+          console.error('Error creating candidate:', error);
+          this.snackBar.open('Error adding candidate. Please try again.', 'Close', {
+            duration: 3000
+          });
+        }
+      });
     } else {
       this.markFormGroupTouched();
       this.snackBar.open('Please fill in all required fields correctly', 'Close', {

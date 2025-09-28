@@ -11,6 +11,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { CandidateService } from '../../../../shared/services/candidate.service';
 
 interface TimesheetData {
   id: string;
@@ -20,6 +21,7 @@ interface TimesheetData {
   hoursLogged: number | null;
   status: 'submitted' | 'pending' | 'approved';
   submittedDate: Date | null;
+  candidateId: number;
 }
 
 @Component({
@@ -47,80 +49,72 @@ export class TimesheetsComponent implements OnInit {
   dataSource = new MatTableDataSource<TimesheetData>([]);
 
   stats = {
-    submitted: 12,
-    pending: 3,
-    totalHours: 1240,
-    activeCandidates: 15
+    submitted: 0,
+    pending: 0,
+    totalHours: 0,
+    activeCandidates: 0
   };
 
-  selectedMonth = '2024-12';
+  selectedMonth = '2025-09';
   selectedStatus = '';
 
   pageSize = 5;
   pageIndex = 0;
   totalItems = 0;
 
-  private mockData: TimesheetData[] = [
-    {
-      id: '1',
-      candidateName: 'Sarah Johnson',
-      email: 'sarah.johnson@email.com',
-      month: 'December 2024',
-      hoursLogged: 168,
-      status: 'submitted',
-      submittedDate: new Date('2024-12-28')
-    },
-    {
-      id: '2',
-      candidateName: 'Michael Chen',
-      email: 'michael.chen@email.com',
-      month: 'December 2024',
-      hoursLogged: null,
-      status: 'pending',
-      submittedDate: null
-    },
-    {
-      id: '3',
-      candidateName: 'Emily Davis',
-      email: 'emily.davis@email.com',
-      month: 'December 2024',
-      hoursLogged: 152,
-      status: 'submitted',
-      submittedDate: new Date('2024-12-30')
-    },
-    {
-      id: '4',
-      candidateName: 'David Wilson',
-      email: 'david.wilson@email.com',
-      month: 'December 2024',
-      hoursLogged: null,
-      status: 'pending',
-      submittedDate: null
-    },
-    {
-      id: '5',
-      candidateName: 'Lisa Thompson',
-      email: 'lisa.thompson@email.com',
-      month: 'December 2024',
-      hoursLogged: 176,
-      status: 'submitted',
-      submittedDate: new Date('2024-12-29')
-    }
-  ];
+  private timesheetData: TimesheetData[] = [];
 
-  constructor(private snackBar: MatSnackBar) {}
+  constructor(
+    private snackBar: MatSnackBar,
+    private candidateService: CandidateService
+  ) {}
 
   ngOnInit(): void {
     this.loadData();
   }
 
   loadData(): void {
-    this.dataSource.data = this.mockData;
-    this.totalItems = this.mockData.length;
+    this.candidateService.getCandidates().subscribe({
+      next: (response) => {
+        this.timesheetData = response.items.map(candidate => {
+          // Check if candidate was created recently (within last 7 days)
+          const candidateCreatedAt = new Date(candidate.createdAt);
+          const isNewCandidate = (Date.now() - candidateCreatedAt.getTime()) < (7 * 24 * 60 * 60 * 1000);
+
+          // For simulation - existing candidates have random status, new ones are pending
+          const status: 'submitted' | 'pending' | 'approved' = isNewCandidate
+            ? 'pending'
+            : (['submitted', 'pending', 'approved'][Math.floor(Math.random() * 3)] as 'submitted' | 'pending' | 'approved');
+
+          const hasSubmitted = status === 'submitted' || status === 'approved';
+
+          return {
+            id: candidate.candidateId.toString(),
+            candidateId: candidate.candidateId,
+            candidateName: `${candidate.firstName} ${candidate.lastName}`,
+            email: candidate.email,
+            month: 'September 2025',
+            hoursLogged: hasSubmitted ? Math.floor(Math.random() * 40) + 120 : null,
+            status: status,
+            submittedDate: hasSubmitted ? new Date(2025, 8, Math.floor(Math.random() * 25) + 1) : null
+          };
+        });
+
+        this.updateStats();
+        this.onFilterChange();
+      },
+      error: (error) => {
+        console.error('Error fetching candidates:', error);
+        this.snackBar.open('Error loading timesheet data', 'Close', { duration: 3000 });
+        this.timesheetData = [];
+        this.dataSource.data = [];
+        this.totalItems = 0;
+      }
+    });
   }
 
   onFilterChange(): void {
-    let filteredData = [...this.mockData];
+    let filteredData = [...this.timesheetData];
 
     if (this.selectedStatus) {
       filteredData = filteredData.filter(item => item.status === this.selectedStatus);
@@ -174,5 +168,21 @@ export class TimesheetsComponent implements OnInit {
     this.snackBar.open('Data refreshed', 'Close', {
       duration: 1000
     });
+  }
+
+  private updateStats(): void {
+    const submitted = this.timesheetData.filter(t => t.status === 'submitted').length;
+    const pending = this.timesheetData.filter(t => t.status === 'pending').length;
+    const approved = this.timesheetData.filter(t => t.status === 'approved').length;
+    const totalHours = this.timesheetData
+      .filter(t => t.hoursLogged !== null)
+      .reduce((sum, t) => sum + (t.hoursLogged || 0), 0);
+
+    this.stats = {
+      submitted: submitted + approved,
+      pending: pending,
+      totalHours: totalHours,
+      activeCandidates: this.timesheetData.length
+    };
   }
 }

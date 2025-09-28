@@ -1,13 +1,12 @@
 export interface Candidate {
-  id: string;
+  candidateId: number;
   firstName: string;
   lastName: string;
   email: string;
   phoneNumber: string;
   clientName: string;
-  employerId: string;
-  status: CandidateStatus;
-  skills?: string[];
+  status: string;
+  skills?: string;
   experience?: number;
   resume?: string;
   notes?: string;
@@ -30,12 +29,25 @@ export interface CreateCandidateRequest {
   email: string;
   phoneNumber: string;
   clientName: string;
-  skills?: string[];
+  skills?: string;
   experience?: number;
   notes?: string;
+  hourlyRate?: number;
 }
 
 export interface UpdateCandidateRequest extends Partial<CreateCandidateRequest> {
-  id: string;
-  status?: CandidateStatus;
+  id: number;
+  status?: string;
+}
+
+export interface CreateCandidateResponse {
+  candidateId: number;
+  message: string;
+}
+
+export interface CandidateListResponse {
+  items: Candidate[];
+  page: number;
+  pageSize: number;
+  total: number;
 }

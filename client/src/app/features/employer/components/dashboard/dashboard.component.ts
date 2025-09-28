@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CandidateService } from '../../../../shared/services/candidate.service';
-import { CommonModule, DatePipe, DecimalPipe, NgFor, NgIf, TitleCasePipe } from '@angular/common';
+import { CommonModule, DatePipe, DecimalPipe, NgIf, TitleCasePipe } from '@angular/common';
 import { TimesheetSummary } from '../../../../core/models/timesheet.model';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -24,7 +24,7 @@ import {MatChipsModule} from '@angular/material/chips';
   selector: 'app-dashboard',
   standalone: true,
  imports: [
-    NgFor, NgIf,
+    NgIf,
     MatToolbarModule, MatButtonModule, MatIconModule, MatCardModule, MatFormFieldModule, MatListModule,
     MatDividerModule, MatMenuModule, MatBadgeModule, MatSelectModule, DecimalPipe, MatTableModule, MatChipsModule, TitleCasePipe, DatePipe,
     MatPaginatorModule
@@ -48,15 +48,30 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.candidates = this.candidateService.getCandidates();
-    this.recentTimesheets = this.candidates.map(c => ({
-      candidateName: `${c.firstName} ${c.lastName}`,
-      email: c.email,
-      month: 'September 2025',
-      totalHours: Math.floor(Math.random() * 40) + 80,
-      status: ['approved', 'pending', 'rejected'][Math.floor(Math.random() * 3)],
-      weekEnding: new Date(2025, 8, 25 - (Math.floor(Math.random() * 4))),
-    }));
+    this.candidateService.getCandidates().subscribe({
+      next: (response) => {
+        this.candidates = response.items;
+        this.recentTimesheets = this.candidates.map(c => {
+          // Check if candidate was created recently (within last 7 days)
+          const candidateCreatedAt = new Date(c.createdAt);
+          const isNewCandidate = (Date.now() - candidateCreatedAt.getTime()) < (7 * 24 * 60 * 60 * 1000);
+
+          return {
+            candidateName: `${c.firstName} ${c.lastName}`,
+            email: c.email,
+            month: 'September 2025',
+            totalHours: isNewCandidate ? 0 : Math.floor(Math.random() * 40) + 80,
+            status: isNewCandidate ? 'pending' : ['approved', 'pending', 'rejected'][Math.floor(Math.random() * 3)],
+            weekEnding: new Date(2025, 8, 25 - (Math.floor(Math.random() * 4))),
+          };
+        });
+      },
+      error: (error) => {
+        console.error('Error fetching candidates:', error);
+        this.candidates = [];
+        this.recentTimesheets = [];
+      }
+    });
     this.updatePagedTimesheets();
   }
 

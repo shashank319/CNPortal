@@ -78,10 +78,18 @@ export class CandidatesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-  this.candidates = this.candidateService.getCandidates();
-  this.filteredCandidates = [...this.candidates];
-  this.pagedCandidates = this.filteredCandidates.slice(0, this.pageSize);
-  this.setupSearch();
+    this.candidateService.getCandidates().subscribe({
+      next: (response) => {
+        this.candidates = response.items;
+        this.filteredCandidates = [...this.candidates];
+        this.pagedCandidates = this.filteredCandidates.slice(0, this.pageSize);
+        this.setupSearch();
+      },
+      error: (error) => {
+        console.error('Error fetching candidates:', error);
+        this.snackBar.open('Error loading candidates', 'Close', { duration: 3000 });
+      }
+    });
   }
 
   onPageChange(event: any) {
@@ -143,12 +151,12 @@ export class CandidatesComponent implements OnInit {
   }
 
   editCandidate(candidate: Candidate): void {
-    this.router.navigate(['/employer/edit-employee', candidate.id]);
+    this.router.navigate(['/employer/edit-employee', candidate.candidateId]);
   }
 
   deleteCandidate(candidate: Candidate): void {
     if (confirm(`Are you sure you want to delete ${candidate.firstName} ${candidate.lastName}?`)) {
-      this.candidates = this.candidates.filter(c => c.id !== candidate.id);
+      this.candidates = this.candidates.filter(c => c.candidateId !== candidate.candidateId);
       this.filterCandidates(this.searchForm.value);
       this.snackBar.open(`${candidate.firstName} ${candidate.lastName} has been deleted`, 'Close', {
         duration: 3000
