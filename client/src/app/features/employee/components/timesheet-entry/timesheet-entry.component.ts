@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+// timesheet-entry.component.ts
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -86,10 +87,8 @@ export class TimesheetEntryComponent implements OnInit, OnDestroy {
   ).map(year => ({ value: year, label: year.toString() }));
 
   get totalHours(): number {
-    if (!this.timesheetForm) return 0;
-    const hoursArray = this.timesheetForm.get('hours') as FormArray;
-    if (!hoursArray) return 0;
-    return hoursArray.controls.reduce((total, control) => total + (parseFloat(control.value) || 0), 0);
+    if (!this.calendarDays) return 0;
+    return this.calendarDays.reduce((total, day) => total + (day.hours || 0), 0);
   }
 
   get selectedEmployee(): string {
@@ -104,18 +103,18 @@ export class TimesheetEntryComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private timesheetService: TimesheetEntryService,
     private authService: AuthService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    // Ensure only employees can access this component
     if (!this.authService.isEmployee()) {
       this.snackBar.open('Access denied: This feature is only available for employees', 'Close', { duration: 5000 });
       return;
     }
 
     this.initializeForm();
-    this.generateInitialCalendar();
+    this.generateCalendar();
   }
 
   ngOnDestroy(): void {
@@ -133,37 +132,40 @@ export class TimesheetEntryComponent implements OnInit, OnDestroy {
       hours: this.fb.array([])
     });
 
-    // Watch for period changes
+    // Watch for period changes with debounce to avoid multiple calls
     this.timesheetForm.get('periodType')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        this.generateInitialCalendar();
+        // Clear existing data before regenerating
+        this.calendarDays = [];
+        setTimeout(() => this.generateCalendar(), 0);
       });
 
     this.timesheetForm.get('year')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        this.generateInitialCalendar();
+        setTimeout(() => this.generateCalendar(), 0);
       });
 
     this.timesheetForm.get('month')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        this.generateInitialCalendar();
+        setTimeout(() => this.generateCalendar(), 0);
       });
   }
 
-  private generateInitialCalendar(): void {
+  private generateCalendar(): void {
     const formValue = this.timesheetForm?.value;
     if (!formValue?.periodType || !formValue?.year || !formValue?.month) {
-      console.log('Missing form values for calendar generation:', formValue);
+      console.log('Missing form values, skipping calendar generation');
       return;
     }
 
-    console.log('Generating calendar for:', formValue);
+    console.log('Generating calendar for period type:', formValue.periodType);
 
-    // Generate calendar days based on period type
+    // Clear existing calendar days
     this.calendarDays = [];
+    
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -173,12 +175,18 @@ export class TimesheetEntryComponent implements OnInit, OnDestroy {
       formValue.month
     );
 
-    console.log('Period dates:', { startDate, endDate, periodType: formValue.periodType });
+    console.log('Date range:', { 
+      periodType: formValue.periodType,
+      startDate: startDate.toDateString(), 
+      endDate: endDate.toDateString(),
+      expectedDays: formValue.periodType === 1 ? 7 : formValue.periodType === 2 ? 14 : 'variable'
+    });
 
-    // Generate calendar days
+    // Generate calendar days based on period
     const currentDate = new Date(startDate);
     let dayCount = 0;
-    while (currentDate <= endDate && dayCount < 50) { // Safety limit
+    
+    while (currentDate <= endDate) {
       this.calendarDays.push({
         date: new Date(currentDate),
         dayName: currentDate.toLocaleDateString('en-US', { weekday: 'short' }),
@@ -193,61 +201,98 @@ export class TimesheetEntryComponent implements OnInit, OnDestroy {
     }
 
     console.log(`Generated ${this.calendarDays.length} calendar days`);
+    
+    // Force update the hours form array
     this.updateHoursFormArray();
+    
+    // Force change detection
+    this.cdr.detectChanges();
   }
 
-  private calculatePeriodDates(periodType: TimesheetPeriodType, year: number, month: number): { startDate: Date, endDate: Date } {
+  private calculatePeriodDates(periodType: TimesheetPeriodType, year: number, month: number): 
+    { startDate: Date, endDate: Date } {
+    
     switch (periodType) {
       case TimesheetPeriodType.Weekly:
-        // First week of the selected month (Monday to Sunday)
-        const firstDayOfMonth = new Date(year, month - 1, 1);
-        const startOfWeek = new Date(firstDayOfMonth);
+        // Get the current week (Monday to Sunday)
+        const today = new Date();
+        const currentDate = today.getDate();
+        const currentMonth = today.getMonth() + 1;
+        const currentYear = today.getFullYear();
+        
+        // If viewing current month/year, show current week
+        // Otherwise show first week of selected month
+        let baseDate: Date;
+        if (year === currentYear && month === currentMonth) {
+          baseDate = today;
+        } else {
+          baseDate = new Date(year, month - 1, 1);
+        }
+        
+        const startOfWeek = new Date(baseDate);
         const dayOfWeek = startOfWeek.getDay();
-        const diff = startOfWeek.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust for Monday start
+        const diff = startOfWeek.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
         startOfWeek.setDate(diff);
-
+        
         const endOfWeek = new Date(startOfWeek);
         endOfWeek.setDate(startOfWeek.getDate() + 6);
-
+        
         return { startDate: startOfWeek, endDate: endOfWeek };
 
       case TimesheetPeriodType.BiWeekly:
-        // First two weeks of the selected month (14 days starting from first Monday)
-        const firstDayOfMonth2 = new Date(year, month - 1, 1);
-        const startOfBiWeek = new Date(firstDayOfMonth2);
+        // Get current two weeks or first two weeks of month
+        const today2 = new Date();
+        const currentDate2 = today2.getDate();
+        const currentMonth2 = today2.getMonth() + 1;
+        const currentYear2 = today2.getFullYear();
+        
+        let baseDate2: Date;
+        if (year === currentYear2 && month === currentMonth2) {
+          baseDate2 = today2;
+        } else {
+          baseDate2 = new Date(year, month - 1, 1);
+        }
+        
+        const startOfBiWeek = new Date(baseDate2);
         const dayOfWeek2 = startOfBiWeek.getDay();
         const diff2 = startOfBiWeek.getDate() - dayOfWeek2 + (dayOfWeek2 === 0 ? -6 : 1);
         startOfBiWeek.setDate(diff2);
-        startOfBiWeek.setHours(0, 0, 0, 0);
-
+        
         const endOfBiWeek = new Date(startOfBiWeek);
         endOfBiWeek.setDate(startOfBiWeek.getDate() + 13); // 14 days total
-        endOfBiWeek.setHours(23, 59, 59, 999);
-
+        
         return { startDate: startOfBiWeek, endDate: endOfBiWeek };
 
       case TimesheetPeriodType.Monthly:
         // Full month
         const startOfMonth = new Date(year, month - 1, 1);
-        const endOfMonth = new Date(year, month, 0); // Last day of month
-
+        const endOfMonth = new Date(year, month, 0);
+        
         return { startDate: startOfMonth, endDate: endOfMonth };
 
       default:
-        return { startDate: new Date(), endDate: new Date() };
+        const defaultStart = new Date(year, month - 1, 1);
+        const defaultEnd = new Date(year, month - 1, 1);
+        return { startDate: defaultStart, endDate: defaultEnd };
     }
   }
 
   private updateHoursFormArray(): void {
     const hoursArray = this.timesheetForm.get('hours') as FormArray;
-    hoursArray.clear();
+    
+    // Clear all existing controls
+    while (hoursArray.length !== 0) {
+      hoursArray.removeAt(0);
+    }
 
-    console.log(`Creating ${this.calendarDays.length} form controls`);
+    // Add new controls for each calendar day
     this.calendarDays.forEach((day, index) => {
-      hoursArray.push(this.fb.control(0, [Validators.min(0), Validators.max(24)]));
+      const control = this.fb.control(day.hours || 0, [Validators.min(0), Validators.max(24)]);
+      hoursArray.push(control);
       console.log(`Added control ${index} for ${day.date.toDateString()}`);
     });
-    console.log(`Form array now has ${hoursArray.length} controls`);
+    
+    console.log(`Hours array now has ${hoursArray.length} controls for ${this.calendarDays.length} days`);
   }
 
   getHoursControl(index: number): FormControl {
@@ -259,7 +304,7 @@ export class TimesheetEntryComponent implements OnInit, OnDestroy {
     const target = event.target as HTMLInputElement;
     const hours = parseFloat(target.value) || 0;
 
-    if (hours >= 0 && hours <= 24) {
+    if (hours >= 0 && hours <= 24 && index >= 0 && index < this.calendarDays.length) {
       const hoursArray = this.timesheetForm.get('hours') as FormArray;
       hoursArray.at(index).setValue(hours);
       this.calendarDays[index].hours = hours;
@@ -270,7 +315,7 @@ export class TimesheetEntryComponent implements OnInit, OnDestroy {
     const hoursArray = this.timesheetForm.get('hours') as FormArray;
 
     this.calendarDays.forEach((day, index) => {
-      if (!day.isWeekend) { // Only fill weekdays
+      if (!day.isWeekend) {
         hoursArray.at(index).setValue(8);
         day.hours = 8;
       }
@@ -351,14 +396,12 @@ export class TimesheetEntryComponent implements OnInit, OnDestroy {
       isHoliday: false
     }));
 
-    const currentWeekNumber = this.calculateCurrentWeekNumber(formValue.year, formValue.month);
-
     return {
       employeeID: this.employeeID,
       periodType: formValue.periodType,
       year: formValue.year,
       month: formValue.month,
-      weekNumber: currentWeekNumber,
+      weekNumber: this.calculateCurrentWeekNumber(formValue.year, formValue.month),
       dailyHours: dailyHours,
       isDraft: isDraft
     };
@@ -366,129 +409,65 @@ export class TimesheetEntryComponent implements OnInit, OnDestroy {
 
   private calculateCurrentWeekNumber(year: number, month: number): number {
     const currentDate = new Date();
-
-    // If it's not the current month/year, default to week 1
     if (year !== currentDate.getFullYear() || month !== (currentDate.getMonth() + 1)) {
       return 1;
     }
 
-    // Calculate which week of the month we're in
     const firstDayOfMonth = new Date(year, month - 1, 1);
     const currentDayOfMonth = currentDate.getDate();
-
-    // Find the first Monday of the month
     const firstMonday = new Date(firstDayOfMonth);
     const dayOfWeek = firstDayOfMonth.getDay();
     const daysToAdd = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
     firstMonday.setDate(firstDayOfMonth.getDate() + daysToAdd);
 
-    // If current date is before first Monday, it's week 1
     if (currentDate < firstMonday) {
       return 1;
     }
 
-    // Calculate week number based on days since first Monday
     const daysSinceFirstMonday = Math.floor((currentDate.getTime() - firstMonday.getTime()) / (1000 * 60 * 60 * 24));
     return Math.floor(daysSinceFirstMonday / 7) + 1;
-  }
-
-  getHoursInputClass(day: TimesheetCalendarDay, index: number): string {
-    const control = (this.timesheetForm.get('hours') as FormArray).at(index);
-    const hasValue = day.hours > 0;
-    const hasError = control.invalid && control.touched;
-
-    let classes = 'hours-input';
-
-    if (hasValue) classes += ' filled';
-    if (day.isWeekend) classes += ' weekend';
-    if (hasError) classes += ' error';
-    if (day.isToday) classes += ' today';
-
-    return classes;
-  }
-
-  getDayClass(day: TimesheetCalendarDay): string {
-    let classes = 'calendar-day';
-
-    if (day.isWeekend) classes += ' weekend';
-    if (!day.isCurrentMonth) classes += ' other-month';
-    if (day.isToday) classes += ' today';
-    if (day.hours > 0) classes += ' has-hours';
-
-    return classes;
-  }
-
-  getMonthlyWeeks(): TimesheetCalendarDay[][] {
-    if (!this.calendarDays.length) return [];
-
-    const weeks: TimesheetCalendarDay[][] = [];
-    const startDate = this.calendarDays[0].date;
-
-    // Get first day of month and adjust to start from Sunday
-    const firstDay = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
-    const startOfWeek = new Date(firstDay);
-    startOfWeek.setDate(firstDay.getDate() - firstDay.getDay());
-
-    // Generate 6 weeks to cover the entire month view
-    for (let week = 0; week < 6; week++) {
-      const weekDays: TimesheetCalendarDay[] = [];
-
-      for (let day = 0; day < 7; day++) {
-        const currentDate = new Date(startOfWeek);
-        currentDate.setDate(startOfWeek.getDate() + (week * 7) + day);
-
-        const isCurrentMonth = currentDate.getMonth() === startDate.getMonth();
-        const calendarDay = this.calendarDays.find(cd =>
-          cd.date.toDateString() === currentDate.toDateString()
-        );
-
-        if (calendarDay) {
-          weekDays.push(calendarDay);
-        } else {
-          // Add placeholder for dates outside current timesheet period
-          weekDays.push({
-            date: currentDate,
-            dayName: currentDate.toLocaleDateString('en-US', { weekday: 'short' }),
-            dayNumber: currentDate.getDate(),
-            hours: 0,
-            isWeekend: currentDate.getDay() === 0 || currentDate.getDay() === 6,
-            isCurrentMonth: isCurrentMonth,
-            isToday: false
-          });
-        }
-      }
-
-      weeks.push(weekDays);
-    }
-
-    return weeks;
-  }
-
-  getBiWeeklyWeeks(): TimesheetCalendarDay[][] {
-    console.log(`getBiWeeklyWeeks called, calendarDays length: ${this.calendarDays.length}`);
-    if (!this.calendarDays.length) return [];
-
-    const weeks: TimesheetCalendarDay[][] = [];
-    const week1 = this.calendarDays.slice(0, 7);
-    const week2 = this.calendarDays.slice(7, 14);
-
-    console.log(`Week 1 has ${week1.length} days, Week 2 has ${week2.length} days`);
-
-    if (week1.length > 0) weeks.push(week1);
-    if (week2.length > 0) weeks.push(week2);
-
-    console.log(`Returning ${weeks.length} weeks for bi-weekly view`);
-    return weeks;
   }
 
   getDayIndex(day: TimesheetCalendarDay): number {
     const index = this.calendarDays.findIndex(cd =>
       cd.date.toDateString() === day.date.toDateString()
     );
-    return index >= 0 ? index : -1;
+    return index;
+  }
+
+  getMonthlyDaysWithPadding(): (TimesheetCalendarDay | null)[] {
+    if (!this.calendarDays.length) return [];
+    
+    const result: (TimesheetCalendarDay | null)[] = [];
+    const firstDay = this.calendarDays[0];
+    const startPadding = firstDay.date.getDay();
+    
+    // Add padding for days before month starts
+    for (let i = 0; i < startPadding; i++) {
+      result.push(null);
+    }
+    
+    // Add all calendar days
+    result.push(...this.calendarDays);
+    
+    // Add padding to complete the grid (6 rows * 7 days = 42)
+    while (result.length < 42) {
+      result.push(null);
+    }
+    
+    return result;
   }
 
   getStatusLabel(status: TimesheetStatus): string {
     return STATUS_LABELS[status] || 'Unknown';
+  }
+
+  // Track by functions for better change detection
+  trackByDate(index: number, day: TimesheetCalendarDay): string {
+    return day.date.toISOString();
+  }
+
+  trackByMonthDay(index: number, day: TimesheetCalendarDay | null): string {
+    return day ? day.date.toISOString() : `empty-${index}`;
   }
 }

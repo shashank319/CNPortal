@@ -1,148 +1,127 @@
+<!-- timesheet-entry.component.html -->
 <div class="timesheet-entry-container">
   <!-- Header -->
   <div class="header">
     <h1>Timesheet Entry</h1>
     <div class="user-info">
-      <span class="total-hours">Total Hours: {{ totalHours }}</span>
+      <div class="notification-dot"></div>
+      <div class="user-avatar">
+        <mat-icon>person</mat-icon>
+      </div>
     </div>
   </div>
 
   <!-- Form Controls -->
   <form [formGroup]="timesheetForm" class="timesheet-form">
-    <mat-card class="controls-card">
-      <mat-card-content>
-        <div class="form-row">
-          <mat-form-field appearance="outline" class="period-field">
-            <mat-label>Time Period</mat-label>
-            <mat-select formControlName="periodType">
-              <mat-option *ngFor="let period of periodTypes" [value]="period.value">
-                {{ period.label }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
+    <div class="controls-bar">
+      <div class="form-controls">
+        <div class="control-group">
+          <label>Time Period</label>
+          <mat-select formControlName="periodType" class="custom-select">
+            <mat-option *ngFor="let period of periodTypes" [value]="period.value">
+              {{ period.label }}
+            </mat-option>
+          </mat-select>
+        </div>
 
-          <mat-form-field appearance="outline" class="year-field">
-            <mat-label>Year</mat-label>
-            <mat-select formControlName="year">
-              <mat-option *ngFor="let year of years" [value]="year.value">
-                {{ year.label }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="month-field">
-            <mat-label>Month</mat-label>
-            <mat-select formControlName="month">
+        <div class="control-group">
+          <label>Month</label>
+          <div class="month-year-group">
+            <mat-select formControlName="month" class="custom-select">
               <mat-option *ngFor="let month of months" [value]="month.value">
                 {{ month.label }}
               </mat-option>
             </mat-select>
-          </mat-form-field>
-
-          <div class="employee-info">
-            <span class="employee-label">Employee:</span>
-            <span class="employee-name">{{ selectedEmployee }}</span>
+            <mat-select formControlName="year" class="custom-select year-select">
+              <mat-option *ngFor="let year of years" [value]="year.value">
+                {{ year.label }}
+              </mat-option>
+            </mat-select>
           </div>
         </div>
-      </mat-card-content>
-    </mat-card>
+      </div>
+
+      <div class="total-hours-display">
+        <span class="total-label">Total Hours:</span>
+        <span class="total-value">{{ totalHours }}</span>
+      </div>
+    </div>
 
     <!-- Calendar Grid -->
-    <mat-card class="calendar-card" *ngIf="!isLoading">
-      <mat-card-content>
-        <div class="calendar-grid"
-             [class.weekly-view]="timesheetForm.get('periodType')?.value === 1"
-             [class.biweekly-view]="timesheetForm.get('periodType')?.value === 2"
-             [class.monthly-view]="timesheetForm.get('periodType')?.value === 3">
-
-          <!-- Weekly View -->
-          <div *ngIf="timesheetForm.get('periodType')?.value === 1" class="week-row">
-            <div *ngFor="let day of calendarDays; let i = index" [class]="getDayClass(day)">
-              <div class="day-header">
-                <span class="day-name">{{ day.dayName }}</span>
-                <span class="day-number">{{ day.dayNumber }}</span>
-              </div>
-              <mat-form-field appearance="outline" class="hours-field">
-                <input
-                  matInput
-                  type="number"
-                  min="0"
-                  max="24"
-                  step="0.5"
-                  [formControl]="getHoursControl(i)"
-                  (input)="onHoursChange(i, $event)"
-                  [class]="getHoursInputClass(day, i)"
-                  placeholder="0">
-              </mat-form-field>
-            </div>
+    <div class="calendar-container" *ngIf="!isLoading && calendarDays.length > 0">
+      <!-- Weekly View -->
+      <div *ngIf="timesheetForm.get('periodType')?.value === 1" class="calendar-grid weekly">
+        <div *ngFor="let day of calendarDays; let i = index; trackBy: trackByDate" class="day-cell">
+          <div class="day-header">
+            <span class="day-name">{{ day.dayName }}</span>
+            <span class="day-date">{{ day.dayNumber }}</span>
           </div>
+          <input type="number"
+                 class="hours-input"
+                 [class.filled]="day.hours > 0"
+                 [class.weekend]="day.isWeekend"
+                 min="0"
+                 max="24"
+                 step="0.5"
+                 [value]="day.hours"
+                 (input)="onHoursChange(i, $event)"
+                 placeholder="0">
+        </div>
+      </div>
 
-          <!-- Bi-Weekly View -->
-          <div *ngIf="timesheetForm.get('periodType')?.value === 2" class="biweekly-container">
-            <div class="week-section" *ngFor="let weekDays of getBiWeeklyWeeks(); let weekIndex = index">
-              <h3 class="week-title">Week {{ weekIndex + 1 }}</h3>
-              <div class="week-row">
-                <div *ngFor="let day of weekDays; let i = index" [class]="getDayClass(day)">
-                  <div class="day-header">
-                    <span class="day-name">{{ day.dayName }}</span>
-                    <span class="day-number">{{ day.dayNumber }}</span>
-                  </div>
-                  <mat-form-field appearance="outline" class="hours-field">
-                    <input
-                      matInput
-                      type="number"
-                      min="0"
-                      max="24"
-                      step="0.5"
-                      [formControl]="getHoursControl(weekIndex * 7 + i)"
-                      (input)="onHoursChange(weekIndex * 7 + i, $event)"
-                      [class]="getHoursInputClass(day, weekIndex * 7 + i)"
-                      placeholder="0">
-                  </mat-form-field>
-                </div>
-              </div>
-            </div>
+      <!-- Bi-Weekly View -->
+      <div *ngIf="timesheetForm.get('periodType')?.value === 2" class="calendar-grid biweekly">
+        <div *ngFor="let day of calendarDays; let i = index; trackBy: trackByDate" class="day-cell">
+          <div class="day-header">
+            <span class="day-name">{{ day.dayName }}</span>
+            <span class="day-date">{{ day.dayNumber }}</span>
           </div>
+          <input type="number"
+                 class="hours-input"
+                 [class.filled]="day.hours > 0"
+                 [class.weekend]="day.isWeekend"
+                 min="0"
+                 max="24"
+                 step="0.5"
+                 [value]="day.hours"
+                 (input)="onHoursChange(i, $event)"
+                 placeholder="0">
+        </div>
+      </div>
 
-          <!-- Monthly View -->
-          <div *ngIf="timesheetForm.get('periodType')?.value === 3" class="monthly-container">
-            <div class="month-grid">
-              <!-- Days of week header -->
-              <div class="day-header-row">
-                <div class="day-header-cell">Sun</div>
-                <div class="day-header-cell">Mon</div>
-                <div class="day-header-cell">Tue</div>
-                <div class="day-header-cell">Wed</div>
-                <div class="day-header-cell">Thu</div>
-                <div class="day-header-cell">Fri</div>
-                <div class="day-header-cell">Sat</div>
-              </div>
-
-              <!-- Calendar cells -->
-              <div class="calendar-row" *ngFor="let week of getMonthlyWeeks()">
-                <div *ngFor="let day of week; let i = index" [class]="getDayClass(day)">
-                  <div class="day-header">
-                    <span class="day-number">{{ day.dayNumber }}</span>
-                  </div>
-                  <mat-form-field appearance="outline" class="hours-field" *ngIf="day.isCurrentMonth && getDayIndex(day) >= 0">
-                    <input
-                      matInput
-                      type="number"
-                      min="0"
-                      max="24"
-                      step="0.5"
-                      [formControl]="getHoursControl(getDayIndex(day))"
-                      (input)="onHoursChange(getDayIndex(day), $event)"
-                      [class]="getHoursInputClass(day, getDayIndex(day))"
-                      placeholder="0">
-                  </mat-form-field>
-                </div>
-              </div>
-            </div>
+      <!-- Monthly View -->
+      <div *ngIf="timesheetForm.get('periodType')?.value === 3" class="calendar-grid monthly">
+        <div class="month-header">
+          <div class="day-label">Sun</div>
+          <div class="day-label">Mon</div>
+          <div class="day-label">Tue</div>
+          <div class="day-label">Wed</div>
+          <div class="day-label">Thu</div>
+          <div class="day-label">Fri</div>
+          <div class="day-label">Sat</div>
+        </div>
+        <div class="month-days">
+          <div *ngFor="let day of getMonthlyDaysWithPadding(); let i = index; trackBy: trackByMonthDay" 
+               class="month-day-cell"
+               [class.other-month]="!day || !day.isCurrentMonth">
+            <ng-container *ngIf="day">
+              <span class="month-day-number">{{ day.dayNumber }}</span>
+              <input *ngIf="day.isCurrentMonth && getDayIndex(day) >= 0"
+                     type="number"
+                     class="hours-input small"
+                     [class.filled]="day.hours > 0"
+                     [class.weekend]="day.isWeekend"
+                     min="0"
+                     max="24"
+                     step="0.5"
+                     [value]="day.hours"
+                     (input)="onHoursChange(getDayIndex(day), $event)"
+                     placeholder="0">
+            </ng-container>
           </div>
         </div>
-      </mat-card-content>
-    </mat-card>
+      </div>
+    </div>
 
     <!-- Loading Spinner -->
     <div *ngIf="isLoading" class="loading-container">
@@ -153,56 +132,38 @@
     <!-- Action Buttons -->
     <div class="action-buttons" *ngIf="!isLoading">
       <div class="left-actions">
-        <button
-          type="button"
-          mat-stroked-button
-          (click)="autoFill8Hours()"
-          [disabled]="isSaving"
-          matTooltip="Fill 8 hours for all weekdays">
-          <mat-icon>auto_fix_high</mat-icon>
+        <button type="button" 
+                class="action-btn secondary"
+                (click)="autoFill8Hours()"
+                [disabled]="isSaving">
+          <mat-icon>edit</mat-icon>
           Auto-Fill 8h/day
         </button>
 
-        <button
-          type="button"
-          mat-stroked-button
-          (click)="clearAll()"
-          [disabled]="isSaving"
-          matTooltip="Clear all entered hours">
-          <mat-icon>clear_all</mat-icon>
+        <button type="button"
+                class="action-btn secondary"
+                (click)="clearAll()"
+                [disabled]="isSaving">
+          <mat-icon>clear</mat-icon>
           Clear All
         </button>
       </div>
 
       <div class="right-actions">
-        <button
-          type="button"
-          mat-stroked-button
-          (click)="saveDraft()"
-          [disabled]="isSaving || timesheetForm.invalid">
-          <mat-icon>save</mat-icon>
+        <button type="button"
+                class="action-btn ghost"
+                (click)="saveDraft()"
+                [disabled]="isSaving || timesheetForm.invalid">
           Save Draft
         </button>
 
-        <button
-          type="button"
-          mat-raised-button
-          color="primary"
-          (click)="submitTimesheet()"
-          [disabled]="isSaving || timesheetForm.invalid || totalHours === 0">
-          <mat-icon>send</mat-icon>
+        <button type="button"
+                class="action-btn primary"
+                (click)="submitTimesheet()"
+                [disabled]="isSaving || timesheetForm.invalid || totalHours === 0">
           Submit Timesheet
         </button>
       </div>
-    </div>
-
-    <!-- Status Indicator -->
-    <div *ngIf="currentTimesheet" class="status-indicator">
-      <mat-chip-set>
-        <mat-chip [class]="'status-' + currentTimesheet.status">
-          {{ getStatusLabel(currentTimesheet.status) }}
-        </mat-chip>
-      </mat-chip-set>
     </div>
   </form>
 </div>
