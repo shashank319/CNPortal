@@ -36,11 +36,11 @@
       <button mat-button [matMenuTriggerFor]="userMenu" class="user-menu-button">
         <div class="user-info flex align-center">
           <div class="user-details text-right mr-8">
-            <div class="user-name text-small font-medium">{{ currentUser?.fullName || 'Employee' }}</div>
+            <div class="user-name text-small font-medium">{{ authService.getFullName() || 'Employee' }}</div>
             <div class="user-role text-small text-secondary">Employee</div>
           </div>
           <div class="user-avatar bg-primary text-white rounded-circle flex align-center justify-center">
-            {{ (currentUser?.fullName || 'E').charAt(0) }}
+            {{ (authService.getFullName() || 'E').charAt(0) }}
           </div>
         </div>
       </button>

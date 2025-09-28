@@ -19,6 +19,10 @@ export const EMPLOYEE_ROUTES: Routes = [
         loadComponent: () => import('./components/upload-timesheet/upload-timesheet.component').then(c => c.UploadTimesheetComponent)
       },
       {
+        path: 'timesheet-entry',
+        loadComponent: () => import('./components/timesheet-entry/timesheet-entry.component').then(c => c.TimesheetEntryComponent)
+      },
+      {
         path: 'profile',
         loadComponent: () => import('./components/profile/profile.component').then(c => c.ProfileComponent)
       }

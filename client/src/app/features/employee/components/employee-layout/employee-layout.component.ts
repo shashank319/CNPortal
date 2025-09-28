@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { AuthService } from '../../../../core/services/auth.service';
-import { User } from '../../../../core/models/user.model';
+import { AuthService, User } from '../../../../shared/services/auth.service';
 
 // Angular Material imports
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -41,6 +40,11 @@ export class EmployeeLayoutComponent implements OnInit {
       route: '/employee/dashboard'
     },
     {
+      icon: 'schedule',
+      label: 'Timesheet Entry',
+      route: '/employee/timesheet-entry'
+    },
+    {
       icon: 'upload_file',
       label: 'Submit Timesheet',
       route: '/employee/upload-timesheet'
@@ -53,7 +57,7 @@ export class EmployeeLayoutComponent implements OnInit {
   ];
 
   constructor(
-    private authService: AuthService,
+    public authService: AuthService,
     private router: Router
   ) {}
 
@@ -72,7 +76,12 @@ export class EmployeeLayoutComponent implements OnInit {
     this.router.navigate(['/auth/login']);
   }
 
+  getFullName(): string {
+    return this.authService.getFullName();
+  }
+
   navigateTo(route: string): void {
     this.router.navigate([route]);
   }
+
 }
