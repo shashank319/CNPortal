@@ -15,13 +15,13 @@ export const routes: Routes = [
     path: 'employer',
     loadChildren: () => import('./features/employer/employer.routes').then(r => r.EMPLOYER_ROUTES),
     canActivate: [AuthGuard],
-    data: { role: 'employer' }
+    data: { roles: ['Admin', 'Manager'] }
   },
   {
     path: 'employee',
     loadChildren: () => import('./features/employee/employee.routes').then(r => r.EMPLOYEE_ROUTES),
     canActivate: [AuthGuard],
-    data: { role: 'employee' }
+    data: { role: 'Emp' }
   },
   {
     path: '**',

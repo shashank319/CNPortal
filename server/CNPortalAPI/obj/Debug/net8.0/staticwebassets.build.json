@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "dNNQAqm3flOW4XFjp2YYGPHsymX9U7c5yT6cj7GndZc=",
+  "Source": "CNPortalAPI",
+  "BasePath": "_content/CNPortalAPI",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

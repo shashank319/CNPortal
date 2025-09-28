@@ -1,0 +1,6 @@
+@CNPortalAPI_HostAddress = http://localhost:5089
+
+GET {{CNPortalAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

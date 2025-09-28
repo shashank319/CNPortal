@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { map, tap, catchError } from 'rxjs/operators';
-import { User, LoginRequest, LoginResponse, RegisterRequest } from '../models/user.model';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
+import { map, tap, catchError, switchMap } from 'rxjs/operators';
+import { User, LoginRequest, LoginResponse, RegisterRequest, EmployeeDetails } from '../models/user.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +12,8 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
+  private readonly apiUrl = environment.apiUrl;
   private readonly TOKEN_KEY = 'cnportal_token';
-  private readonly REFRESH_TOKEN_KEY = 'cnportal_refresh_token';
   private readonly USER_KEY = 'cnportal_user';
 
   constructor(private http: HttpClient) {
@@ -34,24 +35,34 @@ export class AuthService {
   }
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
-    // For demo purposes, using mock authentication
-    return this.mockLogin(credentials).pipe(
-      tap(response => {
-        this.setAuthData(response);
+    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, credentials).pipe(
+      switchMap(response => {
+        if (response.token) {
+          // Store the token
+          localStorage.setItem(this.TOKEN_KEY, response.token);
+
+          // Fetch employee details to create full user object
+          return this.getEmployeeDetails(response.employeeId).pipe(
+            map(employeeDetails => {
+              const user: User = this.mapEmployeeToUser(employeeDetails);
+              this.setUserData(user);
+              return response;
+            })
+          );
+        } else {
+          return of(response);
+        }
       }),
       catchError(error => {
-        throw error;
+        return throwError(() => error.error || error);
       })
     );
   }
 
   register(request: RegisterRequest): Observable<LoginResponse> {
-    // For demo purposes, using mock registration
-    return this.mockRegister(request).pipe(
-      tap(response => {
-        this.setAuthData(response);
-      })
-    );
+    // Registration would be implemented here
+    // For now, return an error as registration isn't implemented in backend
+    return throwError(() => new Error('Registration not implemented'));
   }
 
   logout(): void {
@@ -76,122 +87,37 @@ export class AuthService {
     return user?.role === role;
   }
 
-  refreshToken(): Observable<string> {
-    const refreshToken = localStorage.getItem(this.REFRESH_TOKEN_KEY);
-    if (!refreshToken) {
-      throw new Error('No refresh token available');
-    }
-
-    // Mock refresh token logic
-    return of('mock-new-token').pipe(
-      tap(newToken => {
-        localStorage.setItem(this.TOKEN_KEY, newToken);
-      })
-    );
+  private getEmployeeDetails(employeeId: number): Observable<EmployeeDetails> {
+    return this.http.get<EmployeeDetails>(`${this.apiUrl}/employees/${employeeId}`);
   }
 
-  private setAuthData(response: LoginResponse): void {
-    localStorage.setItem(this.TOKEN_KEY, response.token);
-    localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
-    localStorage.setItem(this.USER_KEY, JSON.stringify(response.user));
-    this.currentUserSubject.next(response.user);
+  private mapEmployeeToUser(employeeDetails: EmployeeDetails): User {
+    return {
+      id: employeeDetails.employeeID.toString(),
+      employeeId: employeeDetails.employeeID,
+      email: employeeDetails.email,
+      fullName: `${employeeDetails.firstName} ${employeeDetails.lastName}`,
+      role: employeeDetails.identity.role as 'Emp' | 'Admin' | 'Manager' | 'Client',
+      vendor: employeeDetails.vendor?.vendorName,
+      isActive: employeeDetails.status === 'Active',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+
+  private setUserData(user: User): void {
+    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+    this.currentUserSubject.next(user);
+  }
+
+  refreshToken(): Observable<string> {
+    // Refresh token logic would be implemented here for production
+    // For now, just return an error as refresh tokens aren't implemented in backend
+    return throwError(() => new Error('Refresh token not implemented'));
   }
 
   private clearAuthData(): void {
     localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
-  }
-
-  // Mock authentication methods for demo
-  private mockLogin(credentials: LoginRequest): Observable<LoginResponse> {
-    return new Observable(observer => {
-      setTimeout(() => {
-        if (credentials.email === 'employer@test.com' && credentials.password === 'password') {
-          const mockUser: User = {
-            id: '1',
-            email: 'employer@test.com',
-            fullName: 'John Smith',
-            role: 'employer',
-            phoneNumber: '+1 (555) 123-4567',
-            isActive: true,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          };
-
-          const response: LoginResponse = {
-            user: mockUser,
-            token: 'mock-jwt-token-employer',
-            refreshToken: 'mock-refresh-token',
-            expiresIn: 3600
-          };
-
-          observer.next(response);
-          observer.complete();
-        } else if (credentials.email === 'employee@test.com' && credentials.password === 'password') {
-          const mockUser: User = {
-            id: '2',
-            email: 'employee@test.com',
-            fullName: 'Jane Doe',
-            role: 'employee',
-            phoneNumber: '+1 (555) 987-6543',
-            employeeId: 'EMP-2024-001',
-            vendor: 'TechCorp Inc.',
-            clientManager: 'Sarah Johnson',
-            department: 'Software Development',
-            startDate: new Date('2024-01-15'),
-            address: {
-              street: '123 Main Street, Apt 4B',
-              city: 'New York',
-              state: 'New York',
-              zipCode: '10001',
-              country: 'United States'
-            },
-            isActive: true,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          };
-
-          const response: LoginResponse = {
-            user: mockUser,
-            token: 'mock-jwt-token-employee',
-            refreshToken: 'mock-refresh-token',
-            expiresIn: 3600
-          };
-
-          observer.next(response);
-          observer.complete();
-        } else {
-          observer.error({ message: 'Invalid credentials' });
-        }
-      }, 1000);
-    });
-  }
-
-  private mockRegister(request: RegisterRequest): Observable<LoginResponse> {
-    return new Observable(observer => {
-      setTimeout(() => {
-        const mockUser: User = {
-          id: Math.random().toString(36).substr(2, 9),
-          email: request.email,
-          fullName: request.fullName,
-          role: request.role,
-          phoneNumber: request.phoneNumber,
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        };
-
-        const response: LoginResponse = {
-          user: mockUser,
-          token: 'mock-jwt-token-new-user',
-          refreshToken: 'mock-refresh-token',
-          expiresIn: 3600
-        };
-
-        observer.next(response);
-        observer.complete();
-      }, 1000);
-    });
   }
 }

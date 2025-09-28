@@ -60,21 +60,21 @@ export class LoginComponent implements OnInit {
     // Auto-fill demo credentials based on selected tab
     if (tab === 'employer') {
       this.loginForm.patchValue({
-        email: 'employer@test.com',
-        password: 'password'
+        email: 'employer1@company.com',
+        password: 'Test@123'
       });
     } else {
       this.loginForm.patchValue({
-        email: 'employee@test.com',
-        password: 'password'
+        email: 'employee1@company.com',
+        password: 'Test@123'
       });
     }
   }
 
   private initializeForm(): void {
     this.loginForm = this.fb.group({
-      email: ['employer@test.com', [Validators.required, Validators.email]],
-      password: ['password', [Validators.required, Validators.minLength(6)]],
+      email: ['employer1@company.com', [Validators.required, Validators.email]],
+      password: ['Test@123', [Validators.required, Validators.minLength(6)]],
       rememberMe: [false]
     });
   }
@@ -87,11 +87,27 @@ export class LoginComponent implements OnInit {
       this.authService.login(this.loginForm.value).subscribe({
         next: (response) => {
           this.isLoading = false;
-          // Redirect based on user role
-          if (response.user.role === 'employer') {
-            this.router.navigate([this.returnUrl || '/employer/dashboard']);
-          } else if (response.user.role === 'employee') {
-            this.router.navigate([this.returnUrl || '/employee/dashboard']);
+
+          if (response.requirePasswordChange) {
+            // Handle first-time login password change
+            this.snackBar.open('Please change your password on first login', 'Close', {
+              duration: 5000,
+              horizontalPosition: 'center',
+              verticalPosition: 'top'
+            });
+            // Redirect to password change component (to be implemented)
+            return;
+          }
+
+          // Get current user to determine redirect
+          const currentUser = this.authService.getCurrentUser();
+          if (currentUser) {
+            // Redirect based on user role
+            if (currentUser.role === 'Admin' || currentUser.role === 'Manager') {
+              this.router.navigate([this.returnUrl || '/employer/dashboard']);
+            } else if (currentUser.role === 'Emp') {
+              this.router.navigate([this.returnUrl || '/employee/dashboard']);
+            }
           }
         },
         error: (error) => {

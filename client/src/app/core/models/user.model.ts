@@ -1,10 +1,10 @@
 export interface User {
   id: string;
+  employeeId: number;
   email: string;
   fullName: string;
-  role: 'employer' | 'employee';
+  role: 'Emp' | 'Admin' | 'Manager' | 'Client';
   phoneNumber?: string;
-  employeeId?: string;
   vendor?: string;
   clientManager?: string;
   department?: string;
@@ -31,16 +31,40 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  user: User;
-  token: string;
-  refreshToken: string;
-  expiresIn: number;
+  employeeId: number;
+  requirePasswordChange: boolean;
+  token?: string;
+  role?: string;
+  message: string;
 }
 
 export interface RegisterRequest {
   email: string;
   password: string;
   fullName: string;
-  role: 'employer' | 'employee';
+  role: 'Emp' | 'Admin' | 'Manager' | 'Client';
   phoneNumber?: string;
+}
+
+// Employee details response from API
+export interface EmployeeDetails {
+  employeeID: number;
+  companyName: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  email: string;
+  firstTimeFlag: boolean;
+  status: string;
+  identityID: number;
+  vendorID?: number;
+  identity: {
+    identityID: number;
+    role: string;
+  };
+  vendor?: {
+    vendorID: number;
+    vendorName: string;
+    ratePerHour: number;
+  };
 }
