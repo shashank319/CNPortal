@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CNPortalAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+382a0f91790e8990093e74deb6a94218545238ca")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fb9474bf62c2784ec11057d05f3f6031c35a08ea")]
 [assembly: System.Reflection.AssemblyProductAttribute("CNPortalAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CNPortalAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
