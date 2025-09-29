@@ -37,14 +37,10 @@
                 {{ year.label }}
               </mat-option>
             </mat-select>
-
-             <button type="button" 
-                class="action-btn secondary"
-                (click)="autoFill8Hours()"
-                [disabled]="isSaving">
-             <mat-icon>edit</mat-icon>
-              Auto-Fill 8h/day
-             </button>
+          <button mat-fab extended color="primary" matTooltip="Run magic"  (click)="autoFill8Hours()">
+          <mat-icon>auto_fix_high</mat-icon>
+            Auto-Fill 8h/day
+          </button>
           </div>
         </div>
       </div>
@@ -140,13 +136,7 @@
     <!-- Action Buttons -->
     <div class="action-buttons" *ngIf="!isLoading">
       <div class="left-actions">
-        <button type="button"
-                class="action-btn secondary"
-                (click)="clearAll()"
-                [disabled]="isSaving">
-          <mat-icon>clear</mat-icon>
-          Clear All
-        </button>
+        <button mat-raised-button  (click)="clearAll()">Clear All</button>  
       </div>
 
       <div class="right-actions">
